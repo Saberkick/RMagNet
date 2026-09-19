@@ -1,0 +1,23 @@
+[project]
+name = "RMagNet"
+stage = "scaffold"
+seed = 2026
+
+[paths]
+personal_root = "/share/linmingheng-local/xuke"
+windowseat_repo = "/share/linmingheng-local/xuke/projects/windowseat-reflection-removal"
+windowseat_env = "/share/linmingheng-local/xuke/envs/windowseat-py312"
+manifest = "data/manifest.example.jsonl"
+run_dir = "runs"
+
+[model]
+backend = "toy"  # Only for contract/gradient smoke checks.
+interface_width = 32
+fusion_width = 32
+tr_lora_rank_candidate = 16  # Hypothesis; measure VRAM before choosing.
+
+[training]
+batch_size_candidate = 1
+crop_size_candidate = 512  # Hypothesis; measure VRAM before choosing.
+gradient_accumulation_candidate = 4
+

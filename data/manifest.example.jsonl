@@ -1,0 +1,2 @@
+{"scene_id":"example_scene","capture_id":"example_capture","split":"train","input":"data/raw/example/input.png","gt":"data/raw/example/gt.png","polarization_frames":[],"dolp":null,"interface_mask":null,"edit_mask":null,"registration_score":null,"notes":"Schema example only; paths do not exist."}
+
