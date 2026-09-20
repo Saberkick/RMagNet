@@ -11,3 +11,7 @@
 
 训练代码下一步必须提供可重启 checkpoint、数据 split 哈希、随机种子、环境版本和 adapter 权重，不保存重复的 12B 底座。正式训练前检查共享机器的可用 GPU 与个人目录容量。
 
+## Stage 1 已实现入口
+
+Reflection LoRA 的真实八卡训练、验证、最佳权重和精确断点恢复已落在 `src/rmagnet/stage1_train.py` 与 `scripts/run_stage1.sh`。当前 45°→90° 监督的含义、默认超参数和短程实测见 [Stage 1 训练报告](STAGE1_TRAINING_REPORT.md)。
+

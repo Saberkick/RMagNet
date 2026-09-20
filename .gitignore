@@ -5,6 +5,7 @@ __pycache__/
 data/raw/
 data/processed/
 runs/
+*.log
 checkpoints/
 cache/
 *.safetensors
