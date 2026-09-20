@@ -24,7 +24,11 @@ from .backend import BRANCHES, BranchBackend
 ROOT = Path("/share/linmingheng-local/xuke")
 REPO = ROOT / "projects/windowseat-reflection-removal"
 MANIFEST = ROOT / "configs/windowseat_download_manifest.json"
-ADAPTER_NAMES = {"transmission": "default", "reflection": "reflection"}
+ADAPTER_NAMES = {
+    "transmission": "default",
+    "reflection": "reflection",
+    "fusion": "fusion",
+}
 
 
 def _snapshot(repo: str, revision: str) -> Path:
@@ -88,7 +92,12 @@ class QwenSharedBackend(BranchBackend):
         self.activate("transmission")
 
     @classmethod
-    def from_local(cls, device: torch.device, reflection_rank: int = 8):
+    def from_local(
+        cls,
+        device: torch.device,
+        reflection_rank: int = 8,
+        fusion_rank: int | None = None,
+    ):
         base, lora = check_snapshots()
         upstream = load_upstream()
         vae = upstream.load_qwen_vae(str(base), device)
@@ -117,6 +126,11 @@ class QwenSharedBackend(BranchBackend):
         r_config.r = reflection_rank
         r_config.lora_alpha = reflection_rank
         transformer.add_adapter(r_config, adapter_name=ADAPTER_NAMES["reflection"])
+        if fusion_rank is not None:
+            f_config = copy.deepcopy(config)
+            f_config.r = fusion_rank
+            f_config.lora_alpha = fusion_rank
+            transformer.add_adapter(f_config, adapter_name=ADAPTER_NAMES["fusion"])
         torch.set_rng_state(cpu_rng)
         torch.cuda.set_rng_state(cuda_rng, device)
         return cls(vae, transformer, embeddings, resolution, upstream)
@@ -139,6 +153,29 @@ class QwenSharedBackend(BranchBackend):
             raise ValueError(f"Unknown branch: {branch}")
         self._trainable_branch = branch
         self.activate(branch or "transmission")
+
+    def set_trainable_fusion(self) -> None:
+        if ADAPTER_NAMES["fusion"] not in self.transformer.peft_config:
+            raise RuntimeError("Fusion adapter was not constructed")
+        self._trainable_branch = "fusion"
+        self.transformer.set_adapter(ADAPTER_NAMES["fusion"])
+        for parameter_name, parameter in self.transformer.named_parameters():
+            selected = (
+                ".lora_" in parameter_name
+                and f'.{ADAPTER_NAMES["fusion"]}.' in parameter_name
+            )
+            parameter.requires_grad_(selected)
+
+    def encode_frozen(self, image: torch.Tensor) -> torch.Tensor:
+        with torch.no_grad():
+            return self.upstream.encode(image, self.vae)
+
+    def forward_fusion_latent(self, latent: torch.Tensor) -> torch.Tensor:
+        self.transformer.set_adapter(ADAPTER_NAMES["fusion"])
+        edited = self.upstream.flow_step(
+            latent, self.transformer, self.vae, self.embeddings
+        )
+        return self.upstream.decode(edited, self.vae)
 
     def trainable_summary(self) -> dict[str, int]:
         return {

@@ -98,3 +98,31 @@ class FusionConditionMixer(nn.Module):
             dim=1,
         )
         return (transmission + self.body(evidence)).clamp(0, 1)
+
+
+class LatentFusionMixer(nn.Module):
+    """Fuse frozen I/T/R VAE latents while remaining exactly anchored at T."""
+
+    def __init__(self, channels: int = 16, width: int = 64) -> None:
+        super().__init__()
+        self.channels = channels
+        self.body = nn.Sequential(
+            nn.Conv2d(channels * 3, width, 3, padding=1),
+            nn.SiLU(),
+            nn.Conv2d(width, width, 3, padding=1),
+            nn.SiLU(),
+            nn.Conv2d(width, channels, 3, padding=1),
+        )
+        nn.init.zeros_(self.body[-1].weight)
+        nn.init.zeros_(self.body[-1].bias)
+
+    def forward(
+        self, image: torch.Tensor, transmission: torch.Tensor, reflection: torch.Tensor
+    ) -> torch.Tensor:
+        tensors = (image, transmission, reflection)
+        if any(item.ndim != 5 or item.shape[2] != 1 for item in tensors):
+            raise ValueError("Expected I/T/R latents shaped [B,C,1,H,W]")
+        if not (image.shape == transmission.shape == reflection.shape):
+            raise ValueError("I/T/R latent shapes must match")
+        packed = torch.cat([item[:, :, 0] for item in tensors], dim=1).float()
+        return transmission.float() + self.body(packed).unsqueeze(2)
