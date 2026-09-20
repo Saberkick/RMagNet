@@ -23,11 +23,13 @@ src/rmagnet/m1_backward.py         M1 单分支梯度与显存检查
 src/rmagnet/stage1_train.py         Stage 1 多卡 Reflection LoRA 训练器
 src/rmagnet/stage1_eval.py          Stage 1 identity/affine/最佳/最终验收
 src/rmagnet/stage2_train.py         Stage 2 多卡 Transmission LoRA 训练器
+src/rmagnet/stage2_eval.py          Stage 2 基线/最佳/最终统一评估
 scripts/run_stage1.sh               可完成 Stage 1 的八卡训练脚本
 scripts/smoke_stage1.sh             两卡短程训练检查
 scripts/eval_stage1.sh              单卡 Stage 1 验收脚本
 scripts/run_stage2.sh               默认四卡 Stage 2 训练脚本
 scripts/smoke_stage2.sh             两卡 Stage 2 训练和恢复检查
+scripts/eval_stage2.sh              单卡 Stage 2 正式评估
 src/rmagnet/fusion.py              轻量融合网络
 src/rmagnet/system.py              两次 T/R 前向及融合
 src/rmagnet/losses.py              合成数据损失原型

@@ -161,3 +161,43 @@ bash scripts/run_stage2.sh --num-workers 1
 2. 正式训练至少在 step 0、50、100 导出可视化，关注文字和未反射区域是否被误改。
 3. 最佳模型同时参考验证 L1、PSNR、SSIM；不能只用训练 loss。
 4. 如果 T 很快过拟合 50 张训练图，优先减少 epoch 或降低学习率，不增加 LoRA rank。
+
+## 正式评估
+
+训练完成后执行：
+
+```bash
+cd /share/linmingheng-local/xuke/RMagNet
+CUDA_VISIBLE_DEVICES=0 bash scripts/eval_stage2.sh
+```
+
+默认在 11、12、17 上公平比较：
+
+- 原始输入；
+- 官方、未经微调的 WindowSeat T adapter；
+- `best_transmission_lora.safetensors`；
+- `last_checkpoint.txt` 指向的最终 T adapter。
+
+每个 variant 都重置相同随机种子，以使用相同顺序的 VAE latent sample。PSNR、SSIM 和 L1 从保存后的 8-bit PNG 数值计算。输出位置：
+
+```text
+runs/stage2_transmission_r128/evaluation
+```
+
+其中包括 `metrics.csv`、`evaluation.json`、`REPORT.md`、各模型预测、×4 误差热图和逐图 panel。
+
+只评估官方 WindowSeat 基线，不要求已有训练权重：
+
+```bash
+CUDA_VISIBLE_DEVICES=0 bash scripts/eval_stage2.sh --variants baseline
+```
+
+评估其他样本：
+
+```bash
+# 指定 ID
+CUDA_VISIBLE_DEVICES=0 bash scripts/eval_stage2.sh --ids 11,12,17,18,19
+
+# 全部 53 张；包含训练集，只能用于诊断，不能作为泛化指标
+CUDA_VISIBLE_DEVICES=0 bash scripts/eval_stage2.sh --ids all
+```
