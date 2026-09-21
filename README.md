@@ -45,13 +45,13 @@ src/rmagnet/smoke.py               CPU 前后向检查
 docs/ARCHITECTURE.md               设计和监督关系
 docs/TRAINING.md                   分阶段接入计划
 docs/IMPLEMENTATION_LOG.md         实施记录与验证结果
-docs/M1_REPORT.md                 M1 实测、复现命令与边界
-docs/M1A_DESIGN.md                三 LoRA 最终方案与 M1b 边界
-docs/STAGE1_TRAINING_REPORT.md      Stage 1 流程、实测和执行方法
-docs/STAGE1_ACCEPTANCE.md           Stage 1 量化、视觉验收与结论
-docs/STAGE2_TRAINING.md             Stage 2 训练、显存、checkpoint 与命令
-docs/STAGE3_TRAINING.md             Stage 3 设计、缓存、训练与实测命令
-docs/STAGE3_TEST_RESULTS.md         Stage 3 测试方法与当前结果
+docx/M1branch/M1_REPORT.md                 M1 实测、复现命令与边界
+docx/M1branch/M1A_DESIGN.md                三 LoRA 最终方案与 M1b 边界
+docx/M1branch/STAGE1_TRAINING_REPORT.md      Stage 1 流程、实测和执行方法
+docx/M1branch/STAGE1_ACCEPTANCE.md           Stage 1 量化、视觉验收与结论
+docx/M1branch/STAGE2_TRAINING.md             Stage 2 训练、显存、checkpoint 与命令
+docx/M1branch/STAGE3_TRAINING.md             Stage 3 设计、缓存、训练与实测命令
+docx/M1branch/STAGE3_TEST_RESULTS.md         Stage 3 测试方法与当前结果
 ```
 
 ## 运行骨架检查
@@ -68,15 +68,17 @@ PYTHONPATH=src /share/linmingheng-local/xuke/envs/windowseat-py312/bin/python -m
 
 ## 文档入口
 
-- [M1a 最终方案](docs/M1A_DESIGN.md)：三套 LoRA、冻结 VAE、可选 Interface 和训练顺序。
-- [Stage 1 训练报告](docs/STAGE1_TRAINING_REPORT.md)：数据、损失、多卡同步、checkpoint、命令与实测。
-- [Stage 1 验收报告](docs/STAGE1_ACCEPTANCE.md)：identity/affine 基线、逐图结果、视觉判断和 Stage 1b 建议。
-- [Stage 2 训练说明](docs/STAGE2_TRAINING.md)：T adapter 初始化、四卡脚本、8-bit optimizer、恢复策略与实测。
-- [Stage 3 训练说明](docs/STAGE3_TRAINING.md)：latent 融合、候选缓存、多卡训练与单步验证。
+- [M1 分支阶段总结](docx/M1branch/M1BRANCH_SUMMARY.md)：结构、数据索引、三阶段结果与当前结论。
+
+- [M1a 最终方案](docx/M1branch/M1A_DESIGN.md)：三套 LoRA、冻结 VAE、可选 Interface 和训练顺序。
+- [Stage 1 训练报告](docx/M1branch/STAGE1_TRAINING_REPORT.md)：数据、损失、多卡同步、checkpoint、命令与实测。
+- [Stage 1 验收报告](docx/M1branch/STAGE1_ACCEPTANCE.md)：identity/affine 基线、逐图结果、视觉判断和 Stage 1b 建议。
+- [Stage 2 训练说明](docx/M1branch/STAGE2_TRAINING.md)：T adapter 初始化、四卡脚本、8-bit optimizer、恢复策略与实测。
+- [Stage 3 训练说明](docx/M1branch/STAGE3_TRAINING.md)：latent 融合、候选缓存、多卡训练与单步验证。
 - [框架总结](docs/FRAMEWORK_SUMMARY.md)：当前设计、代码职责与已验证边界。
 - [下一步路线](docs/NEXT_STEPS.md)：真实 DiT 接入、数据、训练和验收闸门。
 - [架构契约](docs/ARCHITECTURE.md)、[训练接入顺序](docs/TRAINING.md)、[实施记录](docs/IMPLEMENTATION_LOG.md)。
 
 ## M1 真实后端（已验证）
 
-`src/rmagnet/qwen_backend.py` 复用 WindowSeat 的 NF4 Qwen、VAE 和 T LoRA，并在同一个 Transformer 注册独立的未训练 R LoRA。`m1_validate.py` 已在 11、12、17 上逐像素复现基线 PNG；`m1_backward.py` 已完成两支 256/512 crop 的单次梯度与显存检查。使用方法、数据、实测值和限制详见 [M1 验证报告](docs/M1_REPORT.md)。界面头、融合器和真实 R 训练仍是骨架阶段。
+`src/rmagnet/qwen_backend.py` 复用 WindowSeat 的 NF4 Qwen、VAE 和 T LoRA，并在同一个 Transformer 注册独立的未训练 R LoRA。`m1_validate.py` 已在 11、12、17 上逐像素复现基线 PNG；`m1_backward.py` 已完成两支 256/512 crop 的单次梯度与显存检查。使用方法、数据、实测值和限制详见 [M1 验证报告](docx/M1branch/M1_REPORT.md)。界面头、融合器和真实 R 训练仍是骨架阶段。
