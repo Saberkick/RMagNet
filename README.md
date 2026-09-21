@@ -26,6 +26,7 @@ src/rmagnet/stage2_train.py         Stage 2 多卡 Transmission LoRA 训练器
 src/rmagnet/stage2_eval.py          Stage 2 基线/最佳/最终统一评估
 src/rmagnet/stage3_cache.py         冻结 T/R 候选缓存
 src/rmagnet/stage3_train.py         latent mixer + LoRA_Fuse 多卡训练器
+src/rmagnet/stage3_eval.py          Stage 3 指标、图片与 R 消融测试
 scripts/run_stage1.sh               可完成 Stage 1 的八卡训练脚本
 scripts/smoke_stage1.sh             两卡短程训练检查
 scripts/eval_stage1.sh              单卡 Stage 1 验收脚本
@@ -35,6 +36,7 @@ scripts/eval_stage2.sh              单卡 Stage 2 正式评估
 scripts/prepare_stage3_cache.sh      生成 Stage 3 候选缓存
 scripts/run_stage3.sh                Stage 3 多卡训练脚本
 scripts/smoke_stage3.sh              Stage 3 单步流程检查
+scripts/eval_stage3.sh               Stage 3 正式测试与消融入口
 src/rmagnet/fusion.py              轻量融合网络
 src/rmagnet/system.py              两次 T/R 前向及融合
 src/rmagnet/losses.py              合成数据损失原型
@@ -49,6 +51,7 @@ docs/STAGE1_TRAINING_REPORT.md      Stage 1 流程、实测和执行方法
 docs/STAGE1_ACCEPTANCE.md           Stage 1 量化、视觉验收与结论
 docs/STAGE2_TRAINING.md             Stage 2 训练、显存、checkpoint 与命令
 docs/STAGE3_TRAINING.md             Stage 3 设计、缓存、训练与实测命令
+docs/STAGE3_TEST_RESULTS.md         Stage 3 测试方法与当前结果
 ```
 
 ## 运行骨架检查
