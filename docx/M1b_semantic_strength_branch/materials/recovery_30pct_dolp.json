@@ -1,0 +1,14 @@
+{
+  "reason": "SSH disconnected after step-100 validation and weight write, before DONE.json",
+  "verified_utc": "2026-09-22T11:33:08.607714+00:00",
+  "train_steps": 100,
+  "validation_steps": [
+    0,
+    50,
+    100
+  ],
+  "tensor_count": 1448,
+  "parameter_count": 852180992,
+  "weight_bytes": 3408917536,
+  "weight_sha256": "265a5ca53e74162204e5c33af8d0523608219acaabe61bc5e49855248c2123f8"
+}

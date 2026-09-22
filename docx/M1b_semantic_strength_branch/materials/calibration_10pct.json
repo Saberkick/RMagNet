@@ -1,0 +1,12 @@
+{
+  "sem_weight": 0.002936870578313556,
+  "base_grad_norm": 0.0015140712494030595,
+  "sem_grad_norm": 0.05155389755964279,
+  "target_gradient_fraction": 0.1,
+  "sample_id": "13",
+  "seed": 2026,
+  "initial_sha256": "f5737d4ffb89e86874a96a02bd58a074299ca12e00ec15cac438c403a342085a",
+  "dino_model": "facebook/dinov2-small",
+  "dino_layer": 6,
+  "mask_threshold_uint8": 64
+}

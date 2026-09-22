@@ -1,0 +1,289 @@
+{
+  "verification": "Full SHA-256 of all six checkpoint files matched evaluation.json on 2026-09-22",
+  "weights": [
+    {
+      "group": "probe_e2",
+      "arm": "base",
+      "path": "/share/linmingheng-local/xuke/RMagNet/runs/m1b/probe_e2/base/final_transmission_lora.safetensors",
+      "bytes": 3408917536,
+      "sha256": "6ea0921ab1fd4eb03c9fe20a55da47ae599a6777c69c76c517315ddad9bd7bad",
+      "done": {
+        "steps": 100,
+        "epochs_completed": 2,
+        "elapsed_seconds": 243.98757927698898,
+        "final_validation": {
+          "means": {
+            "l1": 0.04878587834537029,
+            "psnr": 23.11794090270996,
+            "ssim": 0.8218138615290324,
+            "masked_l1": 0.07465686959524949,
+            "outside_l1": 0.03964318769673506
+          },
+          "per_image": [
+            {
+              "id": "11",
+              "l1": 0.07112301886081696,
+              "psnr": 19.54940414428711,
+              "ssim": 0.7533548474311829,
+              "masked_l1": 0.1170644462108612,
+              "outside_l1": 0.047154366970062256
+            },
+            {
+              "id": "12",
+              "l1": 0.04889853298664093,
+              "psnr": 22.614900588989258,
+              "ssim": 0.8330492973327637,
+              "masked_l1": 0.08180143684148788,
+              "outside_l1": 0.04448660463094711
+            },
+            {
+              "id": "17",
+              "l1": 0.026336083188652992,
+              "psnr": 27.189517974853516,
+              "ssim": 0.8790374398231506,
+              "masked_l1": 0.02510472573339939,
+              "outside_l1": 0.027288591489195824
+            }
+          ]
+        }
+      }
+    },
+    {
+      "group": "probe_e2",
+      "arm": "dolp",
+      "path": "/share/linmingheng-local/xuke/RMagNet/runs/m1b/probe_e2/dolp/final_transmission_lora.safetensors",
+      "bytes": 3408917536,
+      "sha256": "0318122d5d50f0b89191b14bbf67c39fa6574bc520b90851b7fc436cc7696389",
+      "done": {
+        "steps": 100,
+        "epochs_completed": 2,
+        "elapsed_seconds": 272.80564349399356,
+        "final_validation": {
+          "means": {
+            "l1": 0.04868755924204985,
+            "psnr": 23.144978205362957,
+            "ssim": 0.8221079508463541,
+            "masked_l1": 0.0747560877352953,
+            "outside_l1": 0.039482717091838516
+          },
+          "per_image": [
+            {
+              "id": "11",
+              "l1": 0.07103884220123291,
+              "psnr": 19.575838088989258,
+              "ssim": 0.753940761089325,
+              "masked_l1": 0.11745166778564453,
+              "outside_l1": 0.04682426527142525
+            },
+            {
+              "id": "12",
+              "l1": 0.04868006706237793,
+              "psnr": 22.640899658203125,
+              "ssim": 0.8332900404930115,
+              "masked_l1": 0.08182261139154434,
+              "outside_l1": 0.04423600062727928
+            },
+            {
+              "id": "17",
+              "l1": 0.02634376846253872,
+              "psnr": 27.218196868896484,
+              "ssim": 0.8790930509567261,
+              "masked_l1": 0.024993984028697014,
+              "outside_l1": 0.027387885376811028
+            }
+          ]
+        }
+      }
+    },
+    {
+      "group": "probe_e2",
+      "arm": "shuffle",
+      "path": "/share/linmingheng-local/xuke/RMagNet/runs/m1b/probe_e2/shuffle/final_transmission_lora.safetensors",
+      "bytes": 3408917536,
+      "sha256": "a47af4fd9e52f53cdf3b731a59533da136a31126a234dc30168d7a9c74731bab",
+      "done": {
+        "steps": 100,
+        "epochs_completed": 2,
+        "elapsed_seconds": 271.80328107299283,
+        "final_validation": {
+          "means": {
+            "l1": 0.04882123445471128,
+            "psnr": 23.126217524210613,
+            "ssim": 0.8217849930127462,
+            "masked_l1": 0.07479045229653518,
+            "outside_l1": 0.03969029585520426
+          },
+          "per_image": [
+            {
+              "id": "11",
+              "l1": 0.0712774470448494,
+              "psnr": 19.54770851135254,
+              "ssim": 0.7528427839279175,
+              "masked_l1": 0.11745753139257431,
+              "outside_l1": 0.0471842922270298
+            },
+            {
+              "id": "12",
+              "l1": 0.04868209362030029,
+              "psnr": 22.6485538482666,
+              "ssim": 0.833513081073761,
+              "masked_l1": 0.08190260827541351,
+              "outside_l1": 0.04422757402062416
+            },
+            {
+              "id": "17",
+              "l1": 0.026504162698984146,
+              "psnr": 27.182390213012695,
+              "ssim": 0.8789991140365601,
+              "masked_l1": 0.0250112172216177,
+              "outside_l1": 0.027659021317958832
+            }
+          ]
+        }
+      }
+    },
+    {
+      "group": "strength30_e2",
+      "arm": "base",
+      "path": "/share/linmingheng-local/xuke/RMagNet/runs/m1b/strength30_e2/base/final_transmission_lora.safetensors",
+      "bytes": 3408917536,
+      "sha256": "1e5ad85c0d3c7112364b35b627f9bdb0b1600e6c9f0259c46e820aac480c624b",
+      "done": {
+        "steps": 100,
+        "epochs_completed": 2,
+        "elapsed_seconds": 239.56545708198973,
+        "final_validation": {
+          "means": {
+            "l1": 0.04881111904978752,
+            "psnr": 23.128599802652996,
+            "ssim": 0.8218955198923746,
+            "masked_l1": 0.07477517239749432,
+            "outside_l1": 0.039665115997195244
+          },
+          "per_image": [
+            {
+              "id": "11",
+              "l1": 0.07132522016763687,
+              "psnr": 19.537891387939453,
+              "ssim": 0.7532176971435547,
+              "masked_l1": 0.11731739342212677,
+              "outside_l1": 0.047330088913440704
+            },
+            {
+              "id": "12",
+              "l1": 0.048772845417261124,
+              "psnr": 22.634140014648438,
+              "ssim": 0.8333549499511719,
+              "masked_l1": 0.0819779634475708,
+              "outside_l1": 0.04432038962841034
+            },
+            {
+              "id": "17",
+              "l1": 0.02633529156446457,
+              "psnr": 27.213768005371094,
+              "ssim": 0.8791139125823975,
+              "masked_l1": 0.025030160322785378,
+              "outside_l1": 0.027344869449734688
+            }
+          ]
+        }
+      }
+    },
+    {
+      "group": "strength30_e2",
+      "arm": "dolp",
+      "path": "/share/linmingheng-local/xuke/RMagNet/runs/m1b/strength30_e2/dolp/final_transmission_lora.safetensors",
+      "bytes": 3408917536,
+      "sha256": "265a5ca53e74162204e5c33af8d0523608219acaabe61bc5e49855248c2123f8",
+      "done": {
+        "steps": 100,
+        "epochs_completed": 2,
+        "elapsed_seconds": null,
+        "final_validation": {
+          "means": {
+            "l1": 0.04873421912391981,
+            "psnr": 23.136470158894856,
+            "ssim": 0.8220406770706177,
+            "masked_l1": 0.07513751275837421,
+            "outside_l1": 0.03937117010354996
+          },
+          "per_image": [
+            {
+              "id": "11",
+              "l1": 0.07126201689243317,
+              "psnr": 19.56455421447754,
+              "ssim": 0.7535198926925659,
+              "masked_l1": 0.11853818595409393,
+              "outside_l1": 0.04659700021147728
+            },
+            {
+              "id": "12",
+              "l1": 0.04865114390850067,
+              "psnr": 22.646636962890625,
+              "ssim": 0.8332949876785278,
+              "masked_l1": 0.0819263756275177,
+              "outside_l1": 0.04418928548693657
+            },
+            {
+              "id": "17",
+              "l1": 0.026289496570825577,
+              "psnr": 27.198219299316406,
+              "ssim": 0.8793071508407593,
+              "masked_l1": 0.02494797669351101,
+              "outside_l1": 0.027327224612236023
+            }
+          ]
+        },
+        "recovered_after_ssh_disconnect": true,
+        "recovery_record": "runs/m1b/strength30_e2/dolp/RECOVERY.json"
+      }
+    },
+    {
+      "group": "strength30_e2",
+      "arm": "shuffle",
+      "path": "/share/linmingheng-local/xuke/RMagNet/runs/m1b/strength30_e2/shuffle/final_transmission_lora.safetensors",
+      "bytes": 3408917536,
+      "sha256": "2432f5dc737f9773ed75b8a0ac75a61ec67f045d38eec94b725b7debc545fd83",
+      "done": {
+        "steps": 100,
+        "epochs_completed": 2,
+        "elapsed_seconds": 238.7377690239955,
+        "final_validation": {
+          "means": {
+            "l1": 0.048897830148537956,
+            "psnr": 23.117478052775066,
+            "ssim": 0.8217139641443888,
+            "masked_l1": 0.0744697426756223,
+            "outside_l1": 0.03992014688750108
+          },
+          "per_image": [
+            {
+              "id": "11",
+              "l1": 0.07142038643360138,
+              "psnr": 19.52011489868164,
+              "ssim": 0.7527025938034058,
+              "masked_l1": 0.1167304739356041,
+              "outside_l1": 0.04778112843632698
+            },
+            {
+              "id": "12",
+              "l1": 0.048925697803497314,
+              "psnr": 22.618253707885742,
+              "ssim": 0.8330963253974915,
+              "masked_l1": 0.08176594972610474,
+              "outside_l1": 0.04452217370271683
+            },
+            {
+              "id": "17",
+              "l1": 0.026347406208515167,
+              "psnr": 27.214065551757812,
+              "ssim": 0.8793429732322693,
+              "masked_l1": 0.02491280436515808,
+              "outside_l1": 0.027457138523459435
+            }
+          ]
+        }
+      }
+    }
+  ]
+}
