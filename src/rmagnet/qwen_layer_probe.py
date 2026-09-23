@@ -56,10 +56,13 @@ def features(backend: QwenSharedBackend, capture: FeatureCapture,
              image: torch.Tensor, layers: tuple[int, ...]) -> dict[int, torch.Tensor]:
     capture.clear()
     latent = deterministic_encode(backend, image)
-    if not hasattr(backend.transformer, "disable_adapter"):
-        raise RuntimeError("PEFT transformer does not expose disable_adapter")
-    with backend.transformer.disable_adapter():
+    if not hasattr(backend.transformer, "disable_lora") or not hasattr(backend.transformer, "enable_lora"):
+        raise RuntimeError("Diffusers transformer does not expose LoRA on/off controls")
+    backend.transformer.disable_lora()
+    try:
         backend.upstream.flow_step(latent, backend.transformer, backend.vae, backend.embeddings)
+    finally:
+        backend.transformer.enable_lora()
     if set(capture.values) != set(layers):
         raise RuntimeError(f"Missing captured layers: {set(layers) - set(capture.values)}")
     return dict(capture.values)
