@@ -622,7 +622,14 @@ def main() -> None:
                 if ".lora_" not in name
             ) and all(value.grad is None for value in backend.vae.parameters())
             boundary = (micro_step + 1) % args.gradient_accumulation == 0 or micro_step + 1 == len(train_loader)
+            # Output-level gradients are already accumulated into LoRA_T. Drop
+            # every per-sample graph reference before constructing the next graph;
+            # four 24 GiB cards otherwise retain enough fragmented memory to OOM.
+            del prediction, q20_prediction, base_grad, q_grad, combined, _losses
+            del image, target, weight_pixel, weight_token, q20_gt
             if not boundary:
+                del base_bundle, q20_loss, scalars
+                torch.cuda.empty_cache()
                 continue
 
             active_tensors = sync_gradients(parameters, device)
@@ -669,6 +676,8 @@ def main() -> None:
                 append_jsonl(args.run_dir / "logs/train.jsonl", record)
                 print(json.dumps(record), flush=True)
 
+            del base_bundle, q20_loss, scalars, grad_norm, local_memory, gathered
+            torch.cuda.empty_cache()
             if global_step >= total_steps:
                 stop = True
                 break
