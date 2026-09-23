@@ -147,8 +147,10 @@ def q20_prediction_features(backend: QwenSharedBackend, prediction: torch.Tensor
         captured["feature"] = output[1]
         raise StopAtQ20
 
+    # The caller must keep LoRA disabled until autograd.grad(q20_loss, prediction)
+    # finishes. Gradient-checkpoint recomputation must see the same adapter state
+    # as this teacher forward.
     handle = backend.transformer.transformer_blocks[BLOCK_INDEX].register_forward_hook(stop_hook)
-    backend.transformer.disable_lora()
     try:
         latent = deterministic_encode(backend, prediction)
         try:
@@ -157,8 +159,6 @@ def q20_prediction_features(backend: QwenSharedBackend, prediction: torch.Tensor
             pass
     finally:
         handle.remove()
-        backend.transformer.enable_lora()
-        backend.transformer.set_adapter(ADAPTER_NAMES["transmission"])
     if "feature" not in captured:
         raise RuntimeError("Frozen Qwen teacher did not reach block 20")
     feature = captured["feature"]
@@ -562,13 +562,22 @@ def main() -> None:
             cache_read_ok = cache_read_ok and all(torch.isfinite(value).all() for value in (weight_pixel, weight_token, q20_gt))
 
             prediction = backend.forward_normalized(image, "transmission")
-            q20_prediction = q20_prediction_features(backend, prediction)
-            base_bundle, q20_loss, _losses, scalars = c1_losses(
-                prediction, image, target, weight_pixel, weight_token, q20_prediction, q20_gt,
-                args.local_coefficient, args.keep_coefficient,
-            )
-            base_grad = torch.autograd.grad(base_bundle, prediction, retain_graph=True)[0]
-            q_grad = torch.autograd.grad(q20_loss, prediction)[0]
+            backend.transformer.disable_lora()
+            try:
+                q20_prediction = q20_prediction_features(backend, prediction)
+                base_bundle, q20_loss, _losses, scalars = c1_losses(
+                    prediction, image, target, weight_pixel, weight_token, q20_prediction, q20_gt,
+                    args.local_coefficient, args.keep_coefficient,
+                )
+                # Q20's checkpointed teacher forward was run with LoRA disabled,
+                # so its recomputation must finish before restoring LoRA_T.
+                q_grad = torch.autograd.grad(q20_loss, prediction)[0]
+            finally:
+                backend.transformer.enable_lora()
+                backend.transformer.set_adapter(ADAPTER_NAMES["transmission"])
+            # The prediction forward used LoRA_T; compute its output gradient only
+            # after LoRA_T has been restored for any checkpoint recomputation.
+            base_grad = torch.autograd.grad(base_bundle, prediction)[0]
             if not torch.isfinite(base_grad).all() or not torch.isfinite(q_grad).all():
                 raise RuntimeError("Non-finite output gradient")
 
