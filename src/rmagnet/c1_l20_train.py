@@ -334,6 +334,7 @@ def save_epoch_checkpoint(
     metrics: dict[str, object],
     top_records: list[dict[str, object]],
     epochs_without_improvement: int,
+    rng_states: list[dict[str, torch.Tensor]],
     smoke: bool,
 ) -> list[dict[str, object]]:
     checkpoints = run_dir / "checkpoints"
@@ -364,9 +365,15 @@ def save_epoch_checkpoint(
             "lambda_q": lambda_q,
             "top_records": top_records,
             "epochs_without_improvement": epochs_without_improvement,
+            "rng_states": rng_states,
         },
         checkpoints / "last" / "trainer_state.pt",
     )
+    (checkpoints / "last" / "resume_meta.json").write_text(json.dumps({
+        "global_step": global_step,
+        "next_epoch": next_epoch,
+        "next_micro_step": next_micro_step,
+    }, indent=2) + "\n")
     (checkpoints / "last" / "metrics.json").write_text(json.dumps(metrics, indent=2) + "\n")
     if top_records and int(top_records[0]["epoch"]) == epoch_number:
         hardlink_replace(epoch_file, checkpoints / "best" / "transmission_lora.safetensors")
@@ -388,6 +395,13 @@ def load_resume(
     state = torch.load(checkpoint / "trainer_state.pt", map_location=device, weights_only=False)
     optimizer.load_state_dict(state["optimizer"])
     scheduler.load_state_dict(state["scheduler"])
+    saved_rng = state.get("rng_states")
+    if saved_rng and len(saved_rng) == world_size():
+        torch.set_rng_state(saved_rng[rank()]["cpu"].cpu())
+        torch.cuda.set_rng_state(saved_rng[rank()]["cuda"].cpu(), device)
+        state["rng_restored"] = True
+    else:
+        state["rng_restored"] = False
     return state
 
 
@@ -420,6 +434,10 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--resume", choices=("auto", "none"), default="auto")
     parser.add_argument("--smoke-samples", type=int, default=8)
     parser.add_argument("--resume-verification", action="store_true")
+    parser.add_argument(
+        "--stop-after-epoch", type=int, default=0,
+        help="Absolute one-based epoch boundary for process recycling; zero runs to completion",
+    )
     return parser.parse_args()
 
 
@@ -449,6 +467,8 @@ def main() -> None:
         raise ValueError("C1-L20 currently fixes per-GPU batch size to one")
     if args.epochs < 1 or args.max_steps < 0:
         raise ValueError("Invalid epoch/step schedule")
+    if args.stop_after_epoch < 0 or args.stop_after_epoch > args.epochs:
+        raise ValueError("stop-after-epoch must be zero or within the requested epoch count")
     if args.mode == "smoke" and (args.gradient_accumulation != 1 or args.max_steps not in (5, 6)):
         raise ValueError("Smoke requires accumulation=1 and max_steps=5, or 6 for resume verification")
 
@@ -509,6 +529,7 @@ def main() -> None:
     top_records: list[dict[str, object]] = []
     resume_dir = args.run_dir / "checkpoints/last"
     resumed_epochs_without = 0
+    rng_restored = False
     resumed = args.resume == "auto" and (resume_dir / "trainer_state.pt").is_file()
     if resumed:
         state = load_resume(resume_dir, backend, optimizer, scheduler, device)
@@ -518,12 +539,16 @@ def main() -> None:
         lambda_q = float(state["lambda_q"])
         top_records = list(state.get("top_records", []))
         resumed_epochs_without = int(state.get("epochs_without_improvement", 0))
+        rng_restored = bool(state.get("rng_restored", False))
+        del state
+        torch.cuda.empty_cache()
     elif args.resume_verification:
         raise RuntimeError("Resume verification requested without a smoke checkpoint")
 
     before_samples = sample_parameters(parameters)
     torch.cuda.reset_peak_memory_stats(device)
-    seed_everything(args.seed + rank())
+    if not rng_restored:
+        seed_everything(args.seed + rank())
     config = {
         "args": vars(args),
         "git_commit": subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip(),
@@ -563,8 +588,9 @@ def main() -> None:
     stopped_early = False
     completed_epochs = start_epoch
     stop = global_step >= total_steps
+    launch_end_epoch = args.epochs if args.stop_after_epoch == 0 else args.stop_after_epoch
 
-    for epoch_index in range(start_epoch, args.epochs):
+    for epoch_index in range(start_epoch, launch_end_epoch):
         if stop:
             break
         sampler.set_epoch(epoch_index)
@@ -707,6 +733,12 @@ def main() -> None:
         do_validate = (args.mode == "smoke" and global_step >= total_steps and not args.resume_verification) or (
             args.mode == "train" and (epoch_finished or global_step >= total_steps)
         )
+        local_rng = {"cpu": torch.get_rng_state(), "cuda": torch.cuda.get_rng_state(device)}
+        gathered_rng: list[dict[str, torch.Tensor] | None] = [None] * world_size()
+        dist.all_gather_object(gathered_rng, local_rng)
+        rng_states = [item for item in gathered_rng if item is not None]
+        if len(rng_states) != world_size():
+            raise RuntimeError("Failed to gather per-rank RNG state")
         if dist.is_initialized():
             dist.barrier()
         if is_main and do_validate:
@@ -730,7 +762,7 @@ def main() -> None:
                 epoch_index if not epoch_finished else epoch_index + 1,
                 0 if epoch_finished else last_micro + 1,
                 backend, optimizer, scheduler, lambda_q, last_validation, top_records,
-                epochs_without_improvement, smoke=args.mode == "smoke",
+                epochs_without_improvement, rng_states, smoke=args.mode == "smoke",
             )
             print(json.dumps(validation_record), flush=True)
         if dist.is_initialized():
@@ -806,6 +838,16 @@ def main() -> None:
             raise RuntimeError(f"Smoke first pass failed: {checks}")
     elif args.mode == "train" and is_main:
         write_summary(args.run_dir, args, global_step, completed_epochs, best_psnr, stopped_early)
+
+    if is_main:
+        training_complete = stopped_early or global_step >= total_steps or completed_epochs >= args.epochs
+        (args.run_dir / "launch_status.json").write_text(json.dumps({
+            "completed_epochs": completed_epochs,
+            "global_step": global_step,
+            "training_complete": training_complete,
+            "early_stopped": stopped_early,
+            "stop_after_epoch": args.stop_after_epoch,
+        }, indent=2) + "\n")
 
     dist.barrier()
     dist.destroy_process_group()

@@ -104,11 +104,36 @@ if [[ "${PREFLIGHT_ONLY:-0}" == "1" ]]; then
   exit 0
 fi
 
-"$UV_BIN" run --no-project --python "$ENVIRONMENT/bin/python" \
-  torchrun --standalone --nproc-per-node=4 -m rmagnet.c1_l20_train \
-  --mode train --run-dir "$RUN_DIR" --epochs "$EPOCHS" --max-steps "$MAX_STEPS" \
-  --batch-size 1 --gradient-accumulation 2 --learning-rate 5e-5 \
-  --local-coefficient 0.25 --keep-coefficient 0.10 \
-  --gradient-measure-every 20 --early-stop-patience 4 --minimum-epochs 5 \
-  --num-workers "${NUM_WORKERS:-1}" --resume "$RESUME" \
-  2>&1 | tee -a "$RUN_DIR/logs/console.log"
+START_EPOCH=0
+RESUME_META="$RUN_DIR/checkpoints/last/resume_meta.json"
+if [[ "$RESUME" == "auto" && -f "$RESUME_META" ]]; then
+  START_EPOCH="$(python3 -c 'import json,sys; print(int(json.load(open(sys.argv[1], encoding="utf-8"))["next_epoch"]))' "$RESUME_META")"
+fi
+if (( START_EPOCH >= EPOCHS )); then
+  echo "Run already reached requested epoch count: $START_EPOCH/$EPOCHS"
+  exit 0
+fi
+
+launch_resume="$RESUME"
+for (( target_epoch = START_EPOCH + 1; target_epoch <= EPOCHS; target_epoch++ )); do
+  echo "Starting isolated epoch $target_epoch/$EPOCHS (CUDA context will recycle afterward)"
+  "$UV_BIN" run --no-project --python "$ENVIRONMENT/bin/python" \
+    torchrun --standalone --nproc-per-node=4 -m rmagnet.c1_l20_train \
+    --mode train --run-dir "$RUN_DIR" --epochs "$EPOCHS" --max-steps "$MAX_STEPS" \
+    --stop-after-epoch "$target_epoch" \
+    --batch-size 1 --gradient-accumulation 2 --learning-rate 5e-5 \
+    --local-coefficient 0.25 --keep-coefficient 0.10 \
+    --gradient-measure-every 20 --early-stop-patience 4 --minimum-epochs 5 \
+    --num-workers "${NUM_WORKERS:-1}" --resume "$launch_resume" \
+    2>&1 | tee -a "$RUN_DIR/logs/console.log"
+  launch_resume=auto
+  if [[ ! -f "$RUN_DIR/launch_status.json" ]]; then
+    echo "Trainer exited without launch_status.json" >&2
+    exit 1
+  fi
+  training_complete="$(python3 -c 'import json,sys; print("1" if json.load(open(sys.argv[1], encoding="utf-8"))["training_complete"] else "0")' "$RUN_DIR/launch_status.json")"
+  if [[ "$training_complete" == "1" ]]; then
+    echo "C1-L20 training reached its configured stopping condition"
+    break
+  fi
+done
