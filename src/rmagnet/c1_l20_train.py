@@ -97,6 +97,25 @@ class C1Dataset(Dataset):
         }
 
 
+class PairedValidationDataset(Dataset):
+    """Validation only needs aligned input and GT; no training-only Q20 cache."""
+
+    def __init__(self, data_root: Path, sample_ids: list[str]):
+        self.data_root = data_root
+        self.sample_ids = sample_ids
+
+    def __len__(self) -> int:
+        return len(self.sample_ids)
+
+    def __getitem__(self, index: int) -> dict[str, object]:
+        sample_id = self.sample_ids[index]
+        image = image_tensor(self.data_root / "blended" / f"{sample_id}.png")
+        target = image_tensor(self.data_root / "transmission_layer" / f"{sample_id}.png")
+        if image.shape != (3, 384, 512) or target.shape != image.shape:
+            raise ValueError(f"Incorrect validation pair shape for {sample_id}")
+        return {"id": sample_id, "image": image, "target": target}
+
+
 def validate_cache(cache_root: Path, data_root: Path, train_ids: list[str]) -> dict[str, object]:
     manifest_path = cache_root / "manifest.json"
     if not manifest_path.is_file():
@@ -448,7 +467,7 @@ def main() -> None:
         (args.run_dir / folder).mkdir(parents=True, exist_ok=True)
 
     train_data = C1Dataset(args.data_root, args.cache_root, train_ids)
-    val_data = C1Dataset(args.data_root, args.cache_root, val_ids)
+    val_data = PairedValidationDataset(args.data_root, val_ids)
     sampler = DistributedSampler(train_data, num_replicas=world_size(), rank=rank(), shuffle=True, seed=args.seed)
     loader_options = {
         "batch_size": args.batch_size,
