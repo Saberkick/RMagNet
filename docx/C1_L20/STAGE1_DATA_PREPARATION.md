@@ -22,7 +22,7 @@ CUDA_VISIBLE_DEVICES=0 bash scripts/prepare_c1_l20.sh
 
 ```text
 data_cache/c1_l20/
-├── gt_features/   # 每张训练 GT 的 Q20 FP16 safetensors
+├── gt_features/   # 每张训练 GT 的 Q20 BF16 safetensors
 ├── weights/       # FP16 weight_token[24,32] 与 weight_pixel[384,512]
 ├── previews/      # D_Q / DoLP / S / W 及四联图
 └── manifest.json
@@ -78,7 +78,7 @@ DoLP 只能把 `D_Q` 乘以 `[0.7,1.0]` 内的系数。代码逐图检查 `0.7*D
 
 WindowSeat 公开的是固定文本 embeddings，没有发布可逆的原始 prompt 字符串。因此清单用 embeddings 文件哈希作为固定提示条件的精确身份。
 
-完整 `Q20(I)` 不落盘；每张图计算完差异后立即释放。完整 `Q20(GT)` 以 FP16 保存，供后续训练期 Qwen 特征损失直接使用。
+完整 `Q20(I)` 不落盘；每张图计算完差异后立即释放。完整 `Q20(GT)` 以 BF16 保存，供后续训练期 Qwen 特征损失直接使用。
 
 ## 重跑规则
 
@@ -89,3 +89,16 @@ WindowSeat 公开的是固定文本 embeddings，没有发布可逆的原始 pro
 ```bash
 CUDA_VISIBLE_DEVICES=0 bash scripts/prepare_c1_l20.sh --overwrite
 ```
+
+## 缓存数据类型修正
+
+Qwen 第20层激活范围可能超过 FP16 的最大有限值 65504，因此 GT 特征必须使用 BF16。BF16 与 FP32 具有相同的指数范围，训练计算余弦损失时再转换为 FP32。权重图数值范围很小，仍使用 FP16。
+
+已有旧版 FP16 缓存时，无需重算权重图，可在四张 GPU 上只重建 GT 特征：
+
+```bash
+CUDA_VISIBLE_DEVICES=0,1,2,3 OMP_NUM_THREADS=1 \
+bash scripts/repair_c1_l20_gt_cache.sh
+```
+
+脚本先写入临时目录，逐文件验证 BF16、形状、有限值和哈希，再原子替换 `gt_features` 并更新 manifest；验证成功后删除旧的无效 FP16 备份。

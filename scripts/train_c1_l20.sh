@@ -96,6 +96,9 @@ assert len(list((cache / 'weights').glob('*.npz'))) == 50
 print('preflight cache check: OK (50 samples, Qwen block 20, timestep 499)')
 PY
 
+"$UV_BIN" run --no-project --python "$ENVIRONMENT/bin/python" \
+  python -m rmagnet.c1_l20_cache_check
+
 if [[ "${PREFLIGHT_ONLY:-0}" == "1" ]]; then
   echo "PREFLIGHT_ONLY=1: stopping before model load"
   exit 0

@@ -70,17 +70,19 @@ class C1Dataset(Dataset):
             weight_token = torch.from_numpy(stored["weight_token"].astype(np.float32))
         q20_gt = safetensors.torch.load_file(
             self.cache_root / "gt_features" / f"{sample_id}.safetensors"
-        )["q20_gt"].float()
+        )["q20_gt"]
         with Image.open(self.data_root / "dolp" / f"{sample_id}.png") as loaded:
             dolp = np.asarray(loaded, dtype=np.float32) / 255.0
         if image.shape != (3, 384, 512) or target.shape != image.shape:
             raise ValueError(f"Incorrect RGB pair shape for {sample_id}")
         if weight_pixel.shape != (384, 512) or weight_token.shape != TOKEN_GRID:
             raise ValueError(f"Incorrect weight shape for {sample_id}")
-        if q20_gt.shape[:1] != (TOKEN_GRID[0] * TOKEN_GRID[1],) or q20_gt.ndim != 2:
+        if q20_gt.dtype != torch.bfloat16:
+            raise ValueError(f"Q20 target must be BF16 for {sample_id}, got {q20_gt.dtype}")
+        if q20_gt.shape != (TOKEN_GRID[0] * TOKEN_GRID[1], 3072):
             raise ValueError(f"Incorrect Q20 target shape for {sample_id}: {q20_gt.shape}")
-        arrays = (weight_pixel.numpy(), weight_token.numpy(), q20_gt.numpy(), dolp)
-        if not all(np.isfinite(value).all() for value in arrays):
+        arrays = (weight_pixel.numpy(), weight_token.numpy(), dolp)
+        if not all(np.isfinite(value).all() for value in arrays) or not torch.isfinite(q20_gt).all():
             raise ValueError(f"Non-finite cached input for {sample_id}")
         if abs(float(weight_pixel.mean()) - 1.0) > 2e-3:
             raise ValueError(f"Pixel weight mean differs from one for {sample_id}")
@@ -107,6 +109,8 @@ def validate_cache(cache_root: Path, data_root: Path, train_ids: list[str]) -> d
         raise RuntimeError("C1-L20 cache uses a different Qwen feature definition")
     if manifest["train_ids"] != train_ids or len(manifest["samples"]) != len(train_ids):
         raise RuntimeError("C1-L20 cache split differs from the current dataset")
+    if feature.get("stored_gt_dtype") != "bfloat16":
+        raise RuntimeError("C1-L20 Q20(GT) cache must use BF16 to avoid FP16 overflow")
     finite_keys = (
         "score_min", "score_max", "raw_min", "raw_max",
         "token_mean_after_normalization", "pixel_min", "pixel_max", "pixel_mean",

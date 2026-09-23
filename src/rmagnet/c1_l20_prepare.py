@@ -259,10 +259,13 @@ def main() -> None:
 
             feature_rel = Path("gt_features") / f"{sample_id}.safetensors"
             weight_rel = Path("weights") / f"{sample_id}.npz"
+            stored_q20_gt = q_gt[0].to(torch.bfloat16).contiguous()
+            if not torch.isfinite(stored_q20_gt).all():
+                raise ValueError(f"BF16 Q20(GT) contains non-finite values for {sample_id}")
             safetensors.torch.save_file(
-                {"q20_gt": q_gt[0].to(torch.float16).contiguous()},
+                {"q20_gt": stored_q20_gt},
                 args.output / feature_rel,
-                metadata={"sample_id": sample_id, "block_one_based": str(BLOCK_NUMBER)},
+                metadata={"sample_id": sample_id, "block_one_based": str(BLOCK_NUMBER), "dtype": "bfloat16"},
             )
             np.savez_compressed(
                 args.output / weight_rel,
@@ -352,7 +355,8 @@ def main() -> None:
             "distance": "1 - cosine(Q20(I), Q20(GT))",
             "vae_encoding": "posterior mode; deterministic",
             "adapters": "all LoRA adapters disabled",
-            "stored_gt_dtype": "float16",
+            "stored_gt_dtype": "bfloat16",
+            "storage_reason": "BF16 preserves Qwen activation range; FP16 can overflow",
             "input_feature_retention": "Q20(I) discarded after each sample",
         },
         "prompt": prompt_metadata(backend, lora_snapshot),

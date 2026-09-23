@@ -100,3 +100,7 @@ runs/c1_l20/<RUN_NAME>/
 只保留 PSNR 最好的三个 epoch 文件；`best` 和 `last` 使用硬链接，避免重复占用约 3.2 GB 的 LoRA 文件空间。`last/trainer_state.pt` 保存 8-bit 优化器、调度器、全局步数、下一数据位置、`lambda_q` 和 early-stopping 状态。
 
 相同命令和相同 `RUN_NAME` 默认 `RESUME=auto`。需要明确新开实验时使用新的 `RUN_NAME`；`RESUME=none` 会拒绝写入非空目录。
+
+## BF16 缓存前置条件
+
+正式训练会在加载 Qwen 前逐个读取并验证 50 份 `Q20(GT)`：必须为 BF16、形状 `768×3072`、全部有限且 SHA-256 与 manifest 一致。旧 FP16 特征会因第20层激活超出 65504 而溢出，不能用于训练。
