@@ -11,3 +11,5 @@ cache/
 *.safetensors
 *.ckpt
 
+
+data_cache/
