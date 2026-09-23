@@ -381,6 +381,20 @@ def save_epoch_checkpoint(
     return top_records
 
 
+def move_optimizer_state(optimizer: torch.optim.Optimizer, device: torch.device) -> None:
+    """Move all optimizer tensors to one device.
+
+    C1-L20 has about 1.7 GiB of 8-bit Adam state per rank. Keeping that state on
+    a 24 GiB GPU during the two expensive Qwen/VAE forwards makes a resumed epoch
+    OOM even though the first epoch fits. The state is needed only for the short
+    optimizer update, so it lives on CPU between updates.
+    """
+    for parameter_state in optimizer.state.values():
+        for key, value in list(parameter_state.items()):
+            if torch.is_tensor(value) and value.device != device:
+                parameter_state[key] = value.to(device, non_blocking=False)
+
+
 def load_resume(
     checkpoint: Path,
     backend: QwenSharedBackend,
@@ -390,10 +404,13 @@ def load_resume(
 ) -> dict[str, object]:
     weights = safetensors.torch.load_file(checkpoint / "transmission_lora.safetensors", device=str(device))
     _, unexpected = backend.transformer.load_state_dict(weights, strict=False)
+    del weights
     if unexpected:
         raise RuntimeError(f"Unexpected resume adapter keys: {unexpected[:5]}")
-    state = torch.load(checkpoint / "trainer_state.pt", map_location=device, weights_only=False)
-    optimizer.load_state_dict(state["optimizer"])
+    # Keep the restored optimizer tensors on CPU. bitsandbytes otherwise moves
+    # 1.7 GiB to every GPU before the first forward of each resumed epoch.
+    state = torch.load(checkpoint / "trainer_state.pt", map_location="cpu", weights_only=False)
+    optimizer.load_state_dict(state["optimizer"], move_to_device=False)
     scheduler.load_state_dict(state["scheduler"])
     saved_rng = state.get("rng_states")
     if saved_rng and len(saved_rng) == world_size():
@@ -566,6 +583,7 @@ def main() -> None:
         "augmentation": "none; positional Q20(GT) cache must remain aligned",
         "teacher": "same frozen NF4 Qwen backbone, all LoRA disabled, early stop after block 20",
         "optimizer": "bitsandbytes.PagedAdamW8bit",
+        "optimizer_state_offload": "cpu_between_updates",
         "resumed": resumed,
     }
     if is_main and not args.resume_verification:
@@ -681,9 +699,15 @@ def main() -> None:
             grad_norm = torch.nn.utils.clip_grad_norm_(parameters, args.max_grad_norm)
             if not torch.isfinite(grad_norm) or float(grad_norm) <= 0:
                 raise RuntimeError(f"Invalid LoRA_T gradient norm: {grad_norm}")
+            # The forward graph has been released, so there is enough room to
+            # stage Adam state on this rank's GPU for the update. Offload it again
+            # before the next Qwen/VAE forward.
+            move_optimizer_state(optimizer, device)
             optimizer.step()
             scheduler.step()
             optimizer.zero_grad(set_to_none=True)
+            move_optimizer_state(optimizer, torch.device("cpu"))
+            torch.cuda.empty_cache()
             global_step += 1
             total_loss = float((base_bundle.detach() + lambda_q * q20_loss.detach()))
             loss_finite = loss_finite and math.isfinite(total_loss) and all(math.isfinite(value) for value in scalars.values())
