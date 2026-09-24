@@ -48,6 +48,8 @@ L = L_base
     + lambda_q * L_Q20
 ```
 
+四个损失项及 `lambda_q` 梯度控制的完整定义见 [LOSS_DEFINITION.md](LOSS_DEFINITION.md)。
+
 离线空间权重采用：
 
 ```text

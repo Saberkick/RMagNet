@@ -63,6 +63,8 @@ L = L_base + 0.25*L_weighted_charbonnier
 
 其中保持项约束低响应区域接近输入图，减少非反射区域的无依据改写。
 
+四个损失项、权重归一化、Q20 余弦距离及 `lambda_q` 梯度控制的完整定义见 [LOSS_DEFINITION.md](LOSS_DEFINITION.md)。
+
 ## 保护措施
 
 脚本在加载 12.5B 模型前检查：
