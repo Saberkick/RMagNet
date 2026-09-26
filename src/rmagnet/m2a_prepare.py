@@ -58,7 +58,7 @@ def atomic_json(path: Path, value: dict) -> None:
 def dataset_state(data_root: Path) -> tuple[dict, list[dict]]:
     manifest_path = data_root / "manifest.json"
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
-    if not manifest.get("complete") or manifest.get("version") != "m2-variable-aspect-v1":
+    if not manifest.get("complete") or manifest.get("version") != "m2-variable-aspect-v2-corrected-labels":
         raise RuntimeError("M2 processed dataset manifest is incomplete or incompatible")
     train_ids = (data_root / "splits/train.txt").read_text(encoding="utf-8").split()
     samples_by_id = {record["id"]: record for record in manifest["samples"]}

@@ -24,7 +24,7 @@ from pathlib import Path
 from PIL import Image, ImageDraw, ImageOps, ImageStat
 
 
-VERSION = "m2-variable-aspect-v1"
+VERSION = "m2-variable-aspect-v2-corrected-labels"
 ROLE_SUFFIXES = {
     "input": "",
     "reflection_90": "_90",
@@ -62,12 +62,14 @@ def sha256_path(path: Path) -> str:
 
 
 def role_from_suffix(suffix: str | None) -> str:
+    # The source archive inherited inverted names: the bare JPEG is the clean
+    # transmission GT and *_GT.jpg is the reflection-contaminated input.
     if not suffix:
-        return "input"
+        return "gt"
     return {
         "_90": "reflection_90",
         "_dolp": "dolp",
-        "_gt": "gt",
+        "_gt": "input",
     }[suffix.lower()]
 
 
