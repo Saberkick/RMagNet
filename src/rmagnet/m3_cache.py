@@ -979,7 +979,9 @@ def audit(args: argparse.Namespace) -> None:
         "reflection_range": [min_reflection, max_reflection],
         "source_hash_errors": max_source_hash_errors,
         "aspect_bucket_counts": dict(bucket_counts),
-        "scratch_removed": False,
+        "scratch_present_before": (output / "scratch").exists(),
+        "scratch_removed_this_run": False,
+        "scratch_present_after": (output / "scratch").exists(),
         "checked_at_utc": utc_now(),
     }
     if args.cleanup_scratch:
@@ -989,7 +991,8 @@ def audit(args: argparse.Namespace) -> None:
             raise RuntimeError("Unsafe scratch path")
         if scratch.exists():
             shutil.rmtree(scratch)
-        result["scratch_removed"] = True
+            result["scratch_removed_this_run"] = True
+        result["scratch_present_after"] = scratch.exists()
     atomic_json(output / "audit/cache_check.json", result)
     print(json.dumps(result, indent=2), flush=True)
 

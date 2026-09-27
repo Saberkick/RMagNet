@@ -85,15 +85,14 @@ data_cache/m3_semantic_v1/
 - 七种长宽比桶全部保留。
 - scratch 已删除。
 
-哈希：
+稳定身份哈希：
 
 ```text
 manifest.json
 2fd98c2811d383f4325cb22e2e6002f91f504ccd5830bc824af186f833d7b920c
-
-audit/cache_check.json
-00cd2daf4c76871f1c9b1dd36b626becf851757a8f4b211597a555935a1daf90
 ```
+
+`audit/cache_check.json` 含复查时间和本次 scratch 操作状态，每次执行检查时会更新，因此不作为缓存身份哈希。
 
 ## 5. 显存与环境
 
