@@ -222,7 +222,9 @@ def online_prediction_features(
         handles.append(
             backend.transformer.transformer_blocks[index].register_forward_hook(hook)
         )
-    backend.transformer.disable_lora()
+    # The caller keeps LoRA disabled until every teacher-derived VJP finishes.
+    # Gradient checkpointing recomputes these blocks during autograd; changing the
+    # adapter state between the forward and recomputation corrupts checkpoint metadata.
     try:
         latent = deterministic_encode(backend, prediction_leaf)
         try:
@@ -236,8 +238,6 @@ def online_prediction_features(
     finally:
         for handle in handles:
             handle.remove()
-        backend.transformer.enable_lora()
-        backend.transformer.set_adapter(ADAPTER_NAMES["transmission"])
     if set(captured) != set(online_blocks):
         raise RuntimeError(f"Missing online features: {set(online_blocks)-set(captured)}")
     for block, feature in captured.items():
