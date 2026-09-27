@@ -86,3 +86,15 @@ runs/m3_nolrec_70/
 ```
 
 日志必须逐步记录 `l_rec: null`、四个有效损失、I/P90 输出梯度、LoRA 梯度、学习率和显存。
+
+## 启动记录
+
+- 已在 2026-09-27 使用 GPU 0–3 后台启动正式 70 步任务。
+- 后台 PID 文件：`runs/m3_nolrec_70.pid`。
+- 控制台日志：`runs/m3_nolrec_70.console.log`。
+- 训练目录：`runs/m3_nolrec_70/`。
+- 离开 SSH 前已稳定运行至 step 12。
+- `l_rec` 为 `null`，四项有效损失及 I/P90 输出梯度均为有限非零值。
+- 每步活跃 LoRA 梯度张量为 1,442。
+- step 12 时单卡峰值 allocated 约 21.96 GiB，reserved 约 23.25 GiB；前 12 步没有持续增长。
+- GPU 0–3 均参与计算；离开前利用率均为 100%。
