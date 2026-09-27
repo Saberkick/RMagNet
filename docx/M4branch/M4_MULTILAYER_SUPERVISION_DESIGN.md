@@ -115,7 +115,7 @@ M4 第一版不把 DoLP 混入门控，以便单独验证多层 Qwen 监督。Do
 ```text
 runs/stage2_transmission_r128/best_transmission_lora.safetensors
 SHA-256:
-f5737d4ffb89e86874a96a02bd58a074299ca12e00ec15cac438cc403a342085a
+f5737d4ffb89e86874a96a02bd58a074299ca12e00ec15cac438c403a342085a
 ```
 
 不从 M3 权重开始，避免继承单层 Q20 监督的偏差。

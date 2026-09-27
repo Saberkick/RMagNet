@@ -71,7 +71,7 @@ DEFAULT_DATA = ROOT / "datasets/rmagnet_m2_aspect"
 DEFAULT_CACHE = PROJECT / "data_cache/m4_multilayer_v1"
 DEFAULT_RUN = PROJECT / "runs/m4_multilayer"
 DEFAULT_INITIAL = PROJECT / "runs/stage2_transmission_r128/best_transmission_lora.safetensors"
-EXPECTED_INITIAL_SHA256 = "f5737d4ffb89e86874a96a02bd58a074299ca12e00ec15cac438cc403a342085a"
+EXPECTED_INITIAL_SHA256 = "f5737d4ffb89e86874a96a02bd58a074299ca12e00ec15cac438c403a342085a"
 MAX_ONLINE_BLOCK = max(MID_BLOCKS)
 
 
