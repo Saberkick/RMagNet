@@ -366,7 +366,7 @@ def gradient_magnitude(rgb: np.ndarray) -> np.ndarray:
     gy = np.zeros_like(gray)
     gx[:, 1:] = np.abs(gray[:, 1:] - gray[:, :-1])
     gy[1:, :] = np.abs(gray[1:, :] - gray[:-1, :])
-    return np.sqrt(gx.square() + gy.square())
+    return np.sqrt(np.square(gx) + np.square(gy))
 
 
 def token_resize(values: np.ndarray, grid_h: int, grid_w: int) -> np.ndarray:
