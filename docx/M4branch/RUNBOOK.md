@@ -97,6 +97,26 @@ bash scripts/train_m4.sh
 
 训练在 `EPOCHS × 36` 和 `MAX_STEPS` 中较早达到的条件结束。
 
+
+## 3.1 最多 30 Epoch、连续 4 Epoch 无改善早停
+
+```bash
+EPOCHS=30 \
+EARLY_STOPPING_PATIENCE=4 \
+RUN_NAME=m4_e30_p4 \
+CUDA_VISIBLE_DEVICES=0,1,2,3 \
+OMP_NUM_THREADS=1 \
+bash scripts/train_m4.sh
+```
+
+早停指标为验证集保存后 8 位 PNG 的宏平均 L1。每个 Epoch（36 次更新）验证一次；只有严格降低 L1 才重置计数，连续 4 个 Epoch 未刷新 best 时停止。最多运行 30 Epoch（1080 次更新）。训练从干净的 Stage 2 best 初始化，只保留：
+
+- `best_transmission_lora.safetensors`：历史最小验证 L1；
+- `latest_transmission_lora.safetensors`：最近一个完整 Epoch；
+- `best_metrics.json` 与 `latest_metrics.json`。
+
+不保存优化器状态和逐 Epoch checkpoint，因此 latest 用于推理比较，不用于精确恢复优化器训练。
+
 ## 4. 后台运行
 
 ```bash

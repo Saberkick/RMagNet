@@ -8,6 +8,7 @@ UV_BIN="${UV_BIN:-/home/xuke/.local/bin/uv}"
 CACHE_ROOT="${M4_CACHE_ROOT:-$PROJECT/data_cache/m4_multilayer_v1}"
 EPOCHS="${1:-${EPOCHS:-10}}"
 MAX_STEPS="${MAX_STEPS:-0}"
+EARLY_STOPPING_PATIENCE="${EARLY_STOPPING_PATIENCE:-0}"
 RUN_NAME="${RUN_NAME:-m4_multilayer_e${EPOCHS}}"
 RUN_DIR="${RUN_DIR:-$PROJECT/runs/$RUN_NAME}"
 GPUS="${CUDA_VISIBLE_DEVICES:-0,1,2,3}"
@@ -26,8 +27,8 @@ export OMP_NUM_THREADS="${OMP_NUM_THREADS:-1}"
 export PYTHONUNBUFFERED=1
 export PYTORCH_CUDA_ALLOC_CONF="expandable_segments:True,garbage_collection_threshold:0.80"
 
-if [[ ! "$EPOCHS" =~ ^[1-9][0-9]*$ || ! "$MAX_STEPS" =~ ^[0-9]+$ ]]; then
-  echo "EPOCHS must be positive and MAX_STEPS must be non-negative" >&2
+if [[ ! "$EPOCHS" =~ ^[1-9][0-9]*$ || ! "$MAX_STEPS" =~ ^[0-9]+$ || ! "$EARLY_STOPPING_PATIENCE" =~ ^[0-9]+$ ]]; then
+  echo "EPOCHS must be positive; MAX_STEPS and EARLY_STOPPING_PATIENCE must be non-negative" >&2
   exit 1
 fi
 IFS=',' read -r -a GPU_ARRAY <<< "$GPUS"
@@ -63,6 +64,7 @@ COMMON_ARGS=(
   --run-dir "$RUN_DIR"
   --epochs "$EPOCHS"
   --max-steps "$MAX_STEPS"
+  --early-stopping-patience "$EARLY_STOPPING_PATIENCE"
   --batch-size 1
   --gradient-accumulation 1
   --learning-rate 5e-6

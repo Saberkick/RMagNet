@@ -31,6 +31,7 @@ from .c1_l20_train import move_optimizer_state
 from .m1b_train import load_initial
 from .m2a_data_baseline import (
     AspectGroupedDistributedSampler,
+    atomic_save_adapter,
     check_initial_hash,
     grouped_global_batches,
     load_m2_manifest,
@@ -433,6 +434,32 @@ def finite(name: str, value: torch.Tensor) -> None:
         raise RuntimeError(f"Non-finite M4 loss {name}: {float(value.detach())}")
 
 
+def save_latest(
+    run_dir: Path,
+    report: dict,
+    step: int,
+    epoch: int,
+    backend: QwenSharedBackend,
+) -> None:
+    atomic_save_adapter(run_dir / "latest_transmission_lora.safetensors", backend)
+    (run_dir / "latest_metrics.json").write_text(
+        json.dumps(
+            {
+                "val_l1": float(report["means"]["l1"]),
+                "val_psnr": report["means"]["psnr"],
+                "val_ssim": report["means"]["ssim"],
+                "val_lpips_squeeze": report["means"]["lpips_squeeze"],
+                "step": step,
+                "epoch": epoch,
+                "criterion": "latest completed epoch validation",
+            },
+            indent=2,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--data-root", type=Path, default=DEFAULT_DATA)
@@ -457,6 +484,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--edge-weight", type=float, default=0.1)
     parser.add_argument("--max-grad-norm", type=float, default=1.0)
     parser.add_argument("--validate-every", type=int, default=0)
+    parser.add_argument("--early-stopping-patience", type=int, default=0)
     parser.add_argument("--seed", type=int, default=2026)
     parser.add_argument("--num-workers", type=int, default=1)
     parser.add_argument("--preflight-only", action="store_true")
@@ -504,6 +532,8 @@ def main() -> None:
         "epochs": args.epochs,
         "planned_steps": planned_steps,
         "validate_every": validate_every,
+        "early_stopping_patience_epochs": args.early_stopping_patience,
+        "checkpoint_policy": "best and latest LoRA only",
         "cache_version": cache_manifest["cache_version"],
         "cache_gib": cache_manifest["storage"]["total_gib"],
         "early_blocks": list(EARLY_BLOCKS),
@@ -528,6 +558,10 @@ def main() -> None:
         raise RuntimeError("M4 requires four GPUs, per-GPU batch 1, accumulation 1")
     if planned_steps <= 0 or validate_every <= 0:
         raise ValueError("M4 planned steps and validation interval must be positive")
+    if args.early_stopping_patience < 0:
+        raise ValueError("Early-stopping patience must be non-negative")
+    if args.early_stopping_patience and validate_every != updates_per_epoch:
+        raise ValueError("Epoch-based early stopping requires validation once per epoch")
     seed_everything(args.seed)
     if args.run_dir.exists() and any(args.run_dir.iterdir()):
         raise FileExistsError(f"Run directory is not empty: {args.run_dir}")
@@ -643,6 +677,8 @@ def main() -> None:
     global_step = 0
     last_validation = None
     stop = False
+    early_stopped = False
+    epochs_without_improvement = 0
     for epoch in range(args.epochs):
         if stop:
             break
@@ -862,6 +898,7 @@ def main() -> None:
 
             if global_step % validate_every == 0:
                 dist.barrier()
+                early_stop_flag = torch.zeros((), dtype=torch.int32, device=device)
                 if is_main:
                     last_validation = validate(
                         backend,
@@ -879,12 +916,31 @@ def main() -> None:
                         backend,
                         args.initial,
                     )
+                    save_latest(
+                        args.run_dir,
+                        last_validation,
+                        global_step,
+                        epoch,
+                        backend,
+                    )
+                    epochs_without_improvement = (
+                        0 if updated else epochs_without_improvement + 1
+                    )
+                    should_early_stop = (
+                        args.early_stopping_patience > 0
+                        and epochs_without_improvement
+                        >= args.early_stopping_patience
+                    )
+                    if should_early_stop:
+                        early_stop_flag.fill_(1)
                     event = {
                         "kind": "validation",
                         "step": global_step,
                         "epoch": epoch,
                         "means": last_validation["means"],
                         "best_updated": updated,
+                        "epochs_without_improvement": epochs_without_improvement,
+                        "early_stop_triggered": should_early_stop,
                     }
                     append_jsonl(args.run_dir / "metrics.jsonl", event)
                     print(json.dumps(event), flush=True)
@@ -894,13 +950,17 @@ def main() -> None:
                         / f"step_{global_step:06d}",
                         ignore_errors=True,
                     )
+                dist.broadcast(early_stop_flag, src=0)
+                if bool(early_stop_flag.item()):
+                    early_stopped = True
+                    stop = True
                 dist.barrier()
 
             if global_step >= planned_steps:
                 stop = True
                 break
 
-    if global_step != planned_steps:
+    if global_step != planned_steps and not early_stopped:
         raise RuntimeError(f"M4 stopped at {global_step}, expected {planned_steps}")
     dist.barrier()
     if global_step % validate_every != 0:
@@ -921,6 +981,13 @@ def main() -> None:
                 backend,
                 args.initial,
             )
+            save_latest(
+                args.run_dir,
+                last_validation,
+                global_step,
+                epoch,
+                backend,
+            )
             event = {
                 "kind": "final_validation",
                 "step": global_step,
@@ -940,13 +1007,23 @@ def main() -> None:
             "status": "complete",
             "experiment": "M4-multilayer-supervision",
             "epochs_requested": args.epochs,
+            "epochs_completed": epoch + 1,
             "optimizer_updates": global_step,
-            "checkpoint_policy": "best LoRA only",
+            "early_stopped": early_stopped,
+            "early_stopping_patience_epochs": args.early_stopping_patience,
+            "epochs_without_improvement": epochs_without_improvement,
+            "checkpoint_policy": "best and latest LoRA only",
             "best_lora": str(
                 args.run_dir / "best_transmission_lora.safetensors"
             ),
             "best_metrics": json.loads(
                 (args.run_dir / "best_metrics.json").read_text()
+            ),
+            "latest_lora": str(
+                args.run_dir / "latest_transmission_lora.safetensors"
+            ),
+            "latest_metrics": json.loads(
+                (args.run_dir / "latest_metrics.json").read_text()
             ),
             "final_validation": (
                 last_validation["means"] if last_validation else None

@@ -357,7 +357,7 @@ g_{\mathrm{base}}
 | 单组目标梯度比例 | 8% |
 | 辅助梯度总上限 | 25% |
 | 验证 | 每个 epoch |
-| 保存 | 仅 best LoRA |
+| 保存 | best 与 latest LoRA |
 | 默认 Epoch | 10 |
 
 推荐顺序：
