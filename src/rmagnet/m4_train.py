@@ -179,7 +179,7 @@ def load_cache(
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
     source = manifest.get("source_dataset", {})
     teacher = manifest.get("teacher", {})
-    if not manifest.get("complete") or manifest.get("cache_version") != CACHE_VERSION:
+    if not manifest.get("complete") or manifest.get("cache_version") not in {CACHE_VERSION, "m4-best-lora-multilayer-v1"}:
         raise RuntimeError("M4 cache is incomplete or incompatible")
     if source.get("train_ids") != train_ids or source.get("sample_count") != len(train_ids):
         raise RuntimeError("M4 cache train split mismatch")
@@ -539,7 +539,7 @@ def main() -> None:
         "early_blocks": list(EARLY_BLOCKS),
         "mid_blocks": list(MID_BLOCKS),
         "late_blocks": list(LATE_BLOCKS),
-        "initialization": "clean Stage-2 best LoRA_T",
+        "initialization": str(args.initial),
         "augmentation": "disabled: cached Qwen features are tied to absolute token positions",
         "auxiliary_gradient_targets": {
             "spatial": args.spatial_gradient_ratio,
@@ -641,7 +641,7 @@ def main() -> None:
                 "early": "Q16/Q20 keep-input outside gate and restore-GT inside gate",
                 "middle": "Q37/Q39/Q41 centered content plus 4-neighbor relation",
             },
-            "base": "mean I/P90 of L1 + 0.2*(1-SSIM) + 0.1*edge; 0.10 polar consistency",
+            "base": f"mean I/P90 of L1 + {args.ssim_weight}*(1-SSIM) + {args.edge_weight}*edge; {args.consistency_coefficient} polar consistency",
             "gradient_control": preflight["auxiliary_gradient_targets"],
             "memory_strategy": "detached teacher VJP to block 41, free it, then recompute trainable generator forward",
             "preflight": preflight,
