@@ -12,7 +12,7 @@
         "sha256": "8099a13e3128ff023d0a3eb39272cc646723dbb30ad77ec933c5409da25967b9"
       }
     ],
-    "verification": "Visual inspection required: same storefront/sign/window/content within crop"
+    "verification": "Visually verified: early full training image and later test crop share the same scene; see cross_stage_scene_overlap.jpg"
   },
   {
     "group": "35",
@@ -27,7 +27,7 @@
         "sha256": "af5ff4de6c441fcaf7f0424970ff5bccf1014b042e23b9bf9f8e85b40fd2bb6a"
       }
     ],
-    "verification": "Visual inspection required: same storefront/sign/window/content within crop"
+    "verification": "Visually verified: early full training image and later test crop share the same scene; see cross_stage_scene_overlap.jpg"
   },
   {
     "group": "43",
@@ -42,7 +42,7 @@
         "sha256": "d1bc42421af216e827237ccaff4becacb3a46257865a6619bf6f20ffe9da8668"
       }
     ],
-    "verification": "Visual inspection required: same storefront/sign/window/content within crop"
+    "verification": "Visually verified: early full training image and later test crop share the same scene; see cross_stage_scene_overlap.jpg"
   },
   {
     "group": "55",
@@ -57,6 +57,6 @@
         "sha256": "7890bf758725723835a4461e9d7e28b1a8f347159a26951189c36a5ce5583252"
       }
     ],
-    "verification": "Visual inspection required: same storefront/sign/window/content within crop"
+    "verification": "Visually verified: early full training image and later test crop share the same scene; see cross_stage_scene_overlap.jpg"
   }
 ]
