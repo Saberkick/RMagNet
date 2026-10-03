@@ -1,0 +1,567 @@
+{
+  "date": "2026-10-03",
+  "method": "Recomputed macro mean from saved-PNG metric CSV; no inference",
+  "sources": {
+    "M2": {
+      "repository_path": "results_archive/M2/m2_corrected_three_way_test/metrics.csv",
+      "sha256": "2669a3db39540757435677532fdf32f9acd7cbf658f95d79aa2447481730a2d1",
+      "count": 18,
+      "means": {
+        "Input": {
+          "l1": 0.055954397242102355,
+          "psnr": 22.205186314053005,
+          "ssim": 0.7860018014907837,
+          "lpips_squeeze": 0.11439291987982061,
+          "low_change_keep_l1": 0.011070179623655148,
+          "high_change_restore_l1": 0.13688837157355416
+        },
+        "M2-A": {
+          "l1": 0.049177523288461894,
+          "psnr": 24.108362197875977,
+          "ssim": 0.8294851746824052,
+          "lpips_squeeze": 0.11568142183952862,
+          "low_change_keep_l1": 0.02388658333155844,
+          "high_change_restore_l1": 0.09481462091207504
+        },
+        "M2-B": {
+          "l1": 0.04876924637291166,
+          "psnr": 24.161831114027237,
+          "ssim": 0.8296209341949887,
+          "lpips_squeeze": 0.11475392203364107,
+          "low_change_keep_l1": 0.02310520790827771,
+          "high_change_restore_l1": 0.09487316829876767
+        },
+        "M2-B1": {
+          "l1": 0.04882806011786064,
+          "psnr": 24.154962645636665,
+          "ssim": 0.8297587500678169,
+          "lpips_squeeze": 0.11507969639367527,
+          "low_change_keep_l1": 0.023095166724589136,
+          "high_change_restore_l1": 0.09512833992226256
+        }
+      }
+    },
+    "M3-70": {
+      "repository_path": "runs/m3_with_lrec_sealed_test/metrics.csv",
+      "sha256": "2ee47cb73968d3eba820e2ee701175d3d07b35d53d89ad646c9663db6c9deedb",
+      "count": 18,
+      "means": {
+        "Input": {
+          "l1": 0.0559543962072995,
+          "psnr": 22.20518620808919,
+          "ssim": 0.786001808113522,
+          "lpips_squeeze": 0.11439291987982061,
+          "low_change_keep_l1": 0.011070179623655148,
+          "high_change_restore_l1": 0.13688837157355416
+        },
+        "M3-with-Lrec": {
+          "l1": 0.049727235144625105,
+          "psnr": 24.0515472624037,
+          "ssim": 0.8291360007392036,
+          "lpips_squeeze": 0.11760122225516373,
+          "low_change_keep_l1": 0.02553217987426453,
+          "high_change_restore_l1": 0.09346372240947352
+        }
+      }
+    },
+    "M4-e2": {
+      "repository_path": "results_archive/M4/m4_e2_sealed_test/metrics.csv",
+      "sha256": "6f4dc13e02ced0823bf00975e1dc499936155531d01bdcf95538f7b8e6be0aac",
+      "count": 18,
+      "means": {
+        "Input": {
+          "l1": 0.0559543962072995,
+          "psnr": 22.20518620808919,
+          "ssim": 0.786001808113522,
+          "lpips_squeeze": 0.11439291987982061,
+          "low_change_keep_l1": 0.011070179623655148,
+          "high_change_restore_l1": 0.13688837157355416
+        },
+        "M4-e2": {
+          "l1": 0.04964533670701914,
+          "psnr": 24.052628835042317,
+          "ssim": 0.8285433252652487,
+          "lpips_squeeze": 0.11831222288310528,
+          "low_change_keep_l1": 0.02568090505277117,
+          "high_change_restore_l1": 0.09298815847271019
+        }
+      }
+    },
+    "M4-first": {
+      "repository_path": "runs/m4_e30_p4/sealed_test/metrics.csv",
+      "sha256": "bf0944811a36ea62d519025c9860cfe588a0152a114f3498ca38cf59f4982298",
+      "count": 18,
+      "means": {
+        "Input": {
+          "l1": 0.05595439631077978,
+          "psnr": 22.20518642001682,
+          "ssim": 0.7860018147362603,
+          "lpips_squeeze": 0.11439291987982061,
+          "low_change_keep_l1": 0.011070179623655148,
+          "high_change_restore_l1": 0.13688837157355416
+        },
+        "M4-best": {
+          "l1": 0.04769053418810169,
+          "psnr": 23.925106048583984,
+          "ssim": 0.8318351970778571,
+          "lpips_squeeze": 0.11273075246976481,
+          "low_change_keep_l1": 0.024504619779893093,
+          "high_change_restore_l1": 0.09148135077622202
+        }
+      }
+    },
+    "M4-final": {
+      "repository_path": "runs/m4_best_newcache_e20_p4/sealed_test/metrics.csv",
+      "sha256": "7d573d37d22fb0f148110228c7bb4402c45d77b773d27b74003f4ce1be899341",
+      "count": 18,
+      "means": {
+        "Input": {
+          "l1": 0.0559543962072995,
+          "psnr": 22.20518620808919,
+          "ssim": 0.786001808113522,
+          "lpips_squeeze": 0.11439291987982061,
+          "low_change_keep_l1": 0.011070179623655148,
+          "high_change_restore_l1": 0.13688837157355416
+        },
+        "M4-best": {
+          "l1": 0.04704170741347803,
+          "psnr": 24.04142083062066,
+          "ssim": 0.8330837819311354,
+          "lpips_squeeze": 0.11266483056048553,
+          "low_change_keep_l1": 0.024218713321412604,
+          "high_change_restore_l1": 0.09027804072118467
+        }
+      }
+    },
+    "M0": {
+      "repository_path": "runs/M0_windowseat_m2_e18/sealed_test/metrics.csv",
+      "sha256": "8486b3d3414c1efb37ec722c92d899702856843e3fb9bfe5a0ffcb4e09e5455e",
+      "count": 18,
+      "means": {
+        "Input": {
+          "l1": 0.0559543962072995,
+          "psnr": 22.20518620808919,
+          "ssim": 0.786001808113522,
+          "lpips_squeeze": 0.11439291987982061,
+          "low_change_keep_l1": 0.011070179623655148,
+          "high_change_restore_l1": 0.13688837157355416
+        },
+        "M0-best": {
+          "l1": 0.049411947580261364,
+          "psnr": 23.773717986212837,
+          "ssim": 0.8278899126582675,
+          "lpips_squeeze": 0.11611896629134814,
+          "low_change_keep_l1": 0.02686078124679625,
+          "high_change_restore_l1": 0.09036852398680316
+        }
+      }
+    },
+    "AfterFull": {
+      "repository_path": "runs/AfterFullM2-B1/sealed_test_best_latest/metrics.csv",
+      "sha256": "b40fae1d33a7d228f39c10e889abe518d4c02ffad511014ca2a7fb2211a6d420",
+      "count": 18,
+      "means": {
+        "best": {
+          "l1": 0.04893074634795388,
+          "psnr": 23.781948301527237,
+          "ssim": 0.8289103209972382,
+          "lpips_squeeze": 0.11341420974996355,
+          "low_change_keep_l1": 0.025992887663758464,
+          "high_change_restore_l1": 0.0912881214171648
+        },
+        "latest": {
+          "l1": 0.04757771656538049,
+          "psnr": 24.023908191257053,
+          "ssim": 0.8321179019080268,
+          "lpips_squeeze": 0.10963229007191128,
+          "low_change_keep_l1": 0.023330124974664714,
+          "high_change_restore_l1": 0.09193774840484063
+        }
+      }
+    },
+    "real20": {
+      "repository_path": "runs/real20_windowseat_m4/metrics.csv",
+      "sha256": "5b3053dbc8c9cb6a12286e9435f5846a7a464322a6d60610f44368744088d34e",
+      "count": 20,
+      "means": {
+        "Input": {
+          "l1": 0.08579637426882983,
+          "psnr": 18.7562472820282,
+          "ssim": 0.7169519990682602
+        },
+        "WindowSeat": {
+          "l1": 0.03271437087096274,
+          "psnr": 27.122685050964357,
+          "ssim": 0.8464091509580612
+        },
+        "M0": {
+          "l1": 0.03752384404651821,
+          "psnr": 26.097065353393553,
+          "ssim": 0.8295607656240463
+        },
+        "M4-best": {
+          "l1": 0.04072711993940174,
+          "psnr": 25.510291194915773,
+          "ssim": 0.8195208072662353
+        }
+      }
+    }
+  },
+  "ancestry_overlap": {
+    "early_train_ids": [
+      "13",
+      "14",
+      "15",
+      "16",
+      "18",
+      "19",
+      "20",
+      "21",
+      "22",
+      "23",
+      "24",
+      "25",
+      "26",
+      "27",
+      "28",
+      "29",
+      "30",
+      "31",
+      "32",
+      "33",
+      "34",
+      "35",
+      "36",
+      "37",
+      "38",
+      "39",
+      "40",
+      "41",
+      "42",
+      "43",
+      "44",
+      "45",
+      "46",
+      "47",
+      "48",
+      "49",
+      "50",
+      "51",
+      "52",
+      "53",
+      "54",
+      "55",
+      "56",
+      "57",
+      "58",
+      "59",
+      "61",
+      "64",
+      "65",
+      "66"
+    ],
+    "early_validation_ids": [
+      "11",
+      "12",
+      "17"
+    ],
+    "subsets": {
+      "same_prefix_early_train": {
+        "ids": [
+          "21_2140_824",
+          "35_1281_1678",
+          "35_3101_1109",
+          "43_3705_2170",
+          "55_1672_1162",
+          "55_3130_569"
+        ],
+        "count": 6,
+        "means": {
+          "M2-A": {
+            "l1": 0.038871421168247856,
+            "psnr": 24.964446385701496,
+            "ssim": 0.8601668179035187,
+            "lpips_squeeze": 0.1105063868065675,
+            "low_change_keep_l1": 0.01594847859814763,
+            "high_change_restore_l1": 0.08627996531625588
+          },
+          "M2-B": {
+            "l1": 0.03886535173902909,
+            "psnr": 24.982325236002605,
+            "ssim": 0.8602396448453268,
+            "lpips_squeeze": 0.10927955433726311,
+            "low_change_keep_l1": 0.01557499294479688,
+            "high_change_restore_l1": 0.08692212961614132
+          },
+          "M2-B1": {
+            "l1": 0.03889252742131551,
+            "psnr": 24.974737803141277,
+            "ssim": 0.8603195250034332,
+            "lpips_squeeze": 0.10992918908596039,
+            "low_change_keep_l1": 0.015475375733027855,
+            "high_change_restore_l1": 0.08713058196008205
+          },
+          "M3-70": {
+            "l1": 0.03914517009009918,
+            "psnr": 24.946650822957356,
+            "ssim": 0.8598601023356119,
+            "lpips_squeeze": 0.11185937126477559,
+            "low_change_keep_l1": 0.017178628438462813,
+            "high_change_restore_l1": 0.08516087134679158
+          },
+          "M4-first": {
+            "l1": 0.03708695713430643,
+            "psnr": 25.178808212280273,
+            "ssim": 0.8626765410105387,
+            "lpips_squeeze": 0.10935201868414879,
+            "low_change_keep_l1": 0.01568874018266797,
+            "high_change_restore_l1": 0.08001162918905418
+          },
+          "M4-final": {
+            "l1": 0.03686531446874142,
+            "psnr": 25.244180997212727,
+            "ssim": 0.8631211519241333,
+            "lpips_squeeze": 0.10951615621646245,
+            "low_change_keep_l1": 0.01565416684995095,
+            "high_change_restore_l1": 0.07899856753647327
+          },
+          "M0": {
+            "l1": 0.03865056671202183,
+            "psnr": 24.776426951090496,
+            "ssim": 0.8585542440414429,
+            "lpips_squeeze": 0.11154101664821307,
+            "low_change_keep_l1": 0.016972580924630165,
+            "high_change_restore_l1": 0.0830169686426719
+          },
+          "AfterFull-best": {
+            "l1": 0.03875430952757597,
+            "psnr": 24.648988405863445,
+            "ssim": 0.8582863509654999,
+            "lpips_squeeze": 0.10932386045654614,
+            "low_change_keep_l1": 0.01741883942546944,
+            "high_change_restore_l1": 0.08363139691452186
+          },
+          "AfterFull-latest": {
+            "l1": 0.038074398723741375,
+            "psnr": 24.911117871602375,
+            "ssim": 0.860284686088562,
+            "lpips_squeeze": 0.10677770401040713,
+            "low_change_keep_l1": 0.01535400158415238,
+            "high_change_restore_l1": 0.08374500585099061
+          }
+        }
+      },
+      "no_prefix_overlap_early_train_or_val": {
+        "ids": [
+          "108_2025_1570",
+          "108_3635_1621",
+          "108_421_1388",
+          "111_2924_1604",
+          "111_830_1325",
+          "141_3946_2327",
+          "153_3556_2410",
+          "73_1862_1921",
+          "73_1904_1067",
+          "77_1933_1814",
+          "94_1826_1832"
+        ],
+        "count": 11,
+        "means": {
+          "M2-A": {
+            "l1": 0.05691464160653678,
+            "psnr": 23.329864328557793,
+            "ssim": 0.807744714346799,
+            "lpips_squeeze": 0.11651635440913113,
+            "low_change_keep_l1": 0.02889718496325341,
+            "high_change_restore_l1": 0.10436344282193617
+          },
+          "M2-B": {
+            "l1": 0.056251560083844444,
+            "psnr": 23.410080996426668,
+            "ssim": 0.8079386949539185,
+            "lpips_squeeze": 0.11574573103677142,
+            "low_change_keep_l1": 0.027848129880360582,
+            "high_change_restore_l1": 0.10407654179090803
+          },
+          "M2-B1": {
+            "l1": 0.056340505961667404,
+            "psnr": 23.401834314519707,
+            "ssim": 0.8080671212889932,
+            "lpips_squeeze": 0.11592537367885763,
+            "low_change_keep_l1": 0.0278957366774028,
+            "high_change_restore_l1": 0.10437817312777042
+          },
+          "M3-70": {
+            "l1": 0.057650296948850155,
+            "psnr": 23.242300900545988,
+            "ssim": 0.8073238080198114,
+            "lpips_squeeze": 0.11875692653385075,
+            "low_change_keep_l1": 0.03090460327538577,
+            "high_change_restore_l1": 0.10274874452840198
+          },
+          "M4-first": {
+            "l1": 0.05536431319672953,
+            "psnr": 22.924243927001953,
+            "ssim": 0.8099925897338174,
+            "lpips_squeeze": 0.11231796815991402,
+            "low_change_keep_l1": 0.030043068384243685,
+            "high_change_restore_l1": 0.10208016193725845
+          },
+          "M4-final": {
+            "l1": 0.054441865448924626,
+            "psnr": 23.07299076427113,
+            "ssim": 0.8116732239723206,
+            "lpips_squeeze": 0.11207030476494269,
+            "low_change_keep_l1": 0.029612194704399866,
+            "high_change_restore_l1": 0.1006762742657553
+          },
+          "M0": {
+            "l1": 0.05738595221191645,
+            "psnr": 22.878633152354848,
+            "ssim": 0.8056296706199646,
+            "lpips_squeeze": 0.11715385182337328,
+            "low_change_keep_l1": 0.033163268669423734,
+            "high_change_restore_l1": 0.09881136227737773
+          },
+          "AfterFull-best": {
+            "l1": 0.05659774479202249,
+            "psnr": 22.937327818437055,
+            "ssim": 0.8073617707599293,
+            "lpips_squeeze": 0.11427840658209541,
+            "low_change_keep_l1": 0.03151985448361798,
+            "high_change_restore_l1": 0.10012721541253003
+          },
+          "AfterFull-latest": {
+            "l1": 0.054717400280589405,
+            "psnr": 23.194237275557086,
+            "ssim": 0.8115208148956299,
+            "lpips_squeeze": 0.10943276976997202,
+            "low_change_keep_l1": 0.028193175538697025,
+            "high_change_restore_l1": 0.10116192004220052
+          }
+        }
+      }
+    }
+  },
+  "comparisons": {
+    "M4-final vs M2-B": {
+      "l1": {
+        "mean_difference": -0.001727538959433635,
+        "wins": 10,
+        "count": 18
+      },
+      "psnr": {
+        "mean_difference": -0.12041028340657552,
+        "wins": 11,
+        "count": 18
+      },
+      "ssim": {
+        "mean_difference": 0.003462847736146715,
+        "wins": 12,
+        "count": 18
+      },
+      "lpips_squeeze": {
+        "mean_difference": -0.0020890914731555516,
+        "wins": 13,
+        "count": 18
+      },
+      "low_change_keep_l1": {
+        "mean_difference": 0.0011135054131348927,
+        "wins": 8,
+        "count": 18
+      },
+      "high_change_restore_l1": {
+        "mean_difference": -0.004595127577582995,
+        "wins": 12,
+        "count": 18
+      }
+    },
+    "M4-final vs M0": {
+      "l1": {
+        "mean_difference": -0.002370240166783333,
+        "wins": 10,
+        "count": 18
+      },
+      "psnr": {
+        "mean_difference": 0.2677028444078233,
+        "wins": 13,
+        "count": 18
+      },
+      "ssim": {
+        "mean_difference": 0.005193869272867839,
+        "wins": 10,
+        "count": 18
+      },
+      "lpips_squeeze": {
+        "mean_difference": -0.0034541357308626175,
+        "wins": 11,
+        "count": 18
+      },
+      "low_change_keep_l1": {
+        "mean_difference": -0.0026420679253836474,
+        "wins": 12,
+        "count": 18
+      },
+      "high_change_restore_l1": {
+        "mean_difference": -9.048326561848323e-05,
+        "wins": 12,
+        "count": 18
+      }
+    },
+    "M4-final vs M4-first": {
+      "l1": {
+        "mean_difference": -0.000648826774623659,
+        "wins": 12,
+        "count": 18
+      },
+      "psnr": {
+        "mean_difference": 0.11631478203667535,
+        "wins": 16,
+        "count": 18
+      },
+      "ssim": {
+        "mean_difference": 0.001248584853278266,
+        "wins": 15,
+        "count": 18
+      },
+      "lpips_squeeze": {
+        "mean_difference": -6.592190927929348e-05,
+        "wins": 6,
+        "count": 18
+      },
+      "low_change_keep_l1": {
+        "mean_difference": -0.0002859064584804906,
+        "wins": 13,
+        "count": 18
+      },
+      "high_change_restore_l1": {
+        "mean_difference": -0.0012033100550373395,
+        "wins": 16,
+        "count": 18
+      }
+    }
+  },
+  "rdnet_different_domain": {
+    "means": {
+      "l1": 0.059130979598396353,
+      "psnr": 22.066452304522198,
+      "ssim": 0.7915355241955997,
+      "low_change_keep_l1": 0.028628939452270668,
+      "high_change_restore_l1": 0.11637009162869719
+    },
+    "dimension_mismatch_ids": [
+      "108_2025_1570",
+      "111_2924_1604",
+      "141_3946_2327",
+      "17_2048_1554",
+      "21_2140_824",
+      "35_3101_1109",
+      "55_1672_1162",
+      "55_3130_569",
+      "73_1904_1067",
+      "77_1933_1814",
+      "94_1826_1832"
+    ],
+    "warning": "Different evaluation geometry; SSIM code parity unverified; not ranked in common table"
+  }
+}

@@ -1,0 +1,62 @@
+[
+  {
+    "group": "21",
+    "test_id": "21_2140_824",
+    "files": [
+      {
+        "path": "D:\\Develop\\RagNet\\data_set_processed_512x384\\blended\\21.png",
+        "sha256": "687211b8c52a4a418177a2c77215cf6329d1067e8a9e4eed03964923b9304d47"
+      },
+      {
+        "path": "D:\\Develop\\PhotoManager\\data_set\\21_2140_824_GT.jpg",
+        "sha256": "8099a13e3128ff023d0a3eb39272cc646723dbb30ad77ec933c5409da25967b9"
+      }
+    ],
+    "verification": "Visual inspection required: same storefront/sign/window/content within crop"
+  },
+  {
+    "group": "35",
+    "test_id": "35_1281_1678",
+    "files": [
+      {
+        "path": "D:\\Develop\\RagNet\\data_set_processed_512x384\\blended\\35.png",
+        "sha256": "a91bdaa9a4f90e19223b66c1a0e5bf6447413f0aaa094a792f32caff4288eed3"
+      },
+      {
+        "path": "D:\\Develop\\PhotoManager\\data_set\\35_1281_1678_GT.jpg",
+        "sha256": "af5ff4de6c441fcaf7f0424970ff5bccf1014b042e23b9bf9f8e85b40fd2bb6a"
+      }
+    ],
+    "verification": "Visual inspection required: same storefront/sign/window/content within crop"
+  },
+  {
+    "group": "43",
+    "test_id": "43_3705_2170",
+    "files": [
+      {
+        "path": "D:\\Develop\\RagNet\\data_set_processed_512x384\\blended\\43.png",
+        "sha256": "bcec093a0a86d353c7a11983bd17ff5ab374923c0ac656b2d159e45e7b794a6e"
+      },
+      {
+        "path": "D:\\Develop\\PhotoManager\\data_set\\43_3705_2170_GT.jpg",
+        "sha256": "d1bc42421af216e827237ccaff4becacb3a46257865a6619bf6f20ffe9da8668"
+      }
+    ],
+    "verification": "Visual inspection required: same storefront/sign/window/content within crop"
+  },
+  {
+    "group": "55",
+    "test_id": "55_1672_1162",
+    "files": [
+      {
+        "path": "D:\\Develop\\RagNet\\data_set_processed_512x384\\blended\\55.png",
+        "sha256": "db85a32354c1ea34453916aa556edd867a27eb47a477b883e71b10c54783d09a"
+      },
+      {
+        "path": "D:\\Develop\\PhotoManager\\data_set\\55_1672_1162_GT.jpg",
+        "sha256": "7890bf758725723835a4461e9d7e28b1a8f347159a26951189c36a5ce5583252"
+      }
+    ],
+    "verification": "Visual inspection required: same storefront/sign/window/content within crop"
+  }
+]

@@ -1,5 +1,7 @@
 # AfterFullM2-B1 完整训练实验总结
 
+> 2026-10-03 来历审计：该模型继承 Stage 2，而 M2 测试集的六张裁剪图来自 Stage 2 训练场景。本文的既有指标有效，但“封存”仅指当前 M2 划分，不能解释为全训练历史从未见过。详情与视觉证据见 [M1–M4 历史审计](../M5branch/M1_TO_M4_EVIDENCE_AND_PIXEL_RESTORATION.md)。
+
 ## 1. 实验目的
 
 AfterFullM2-B1 将纠正标签后的 M2-B1 从 70 步方向性实验扩展为按完整 epoch 训练的实验，用于回答两个问题：
