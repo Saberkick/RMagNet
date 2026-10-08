@@ -29,7 +29,7 @@ def main():
     args=ap.parse_args()
     torch.set_num_threads(4);torch.manual_seed(args.seed);torch.cuda.set_device(0)
     cm=json.loads((args.cache_root/'manifest.json').read_text())
-    if not cm['complete'] or len(cm['samples'])!=144: raise RuntimeError('Unfinalized cache')
+    if not cm['complete'] or len(cm['samples'])!=cm['source_dataset']['sample_count'] or not cm['samples']: raise RuntimeError('Unfinalized cache')
     args.output.mkdir(parents=True,exist_ok=True)
     if (args.output/'memory.safetensors').exists(): raise FileExistsError('Pretraining output exists')
     model=SMA().cuda(); sampled=[];raw=[]
@@ -79,7 +79,7 @@ def main():
     with torch.no_grad():
         trained=sum(float(loss(model.memory(z[0],g),z[2],g,model.projection.scale)[0]+loss(model.memory(z[1],g),z[2],g,model.projection.scale)[0])*.5 for _,g,z in projected)/len(projected)
     atomic_safetensors(args.output/'memory.safetensors',model.state_dict(),{'experiment':'SMA','teacher_sha256':cm['teacher']['adapter_sha256'],'cache_manifest_sha256':sha256(args.cache_root/'manifest.json')})
-    atomic_json(args.output/'report.json',{'epochs':args.epochs,'train_images':144,'optimization_updates':args.epochs*144,'identity_train_loss':identity,'trained_train_loss':trained,'train_improvement':identity-trained,'validation_claim':'none: feature pretraining reports training fit only; final generator selects on 18 validation images','events':events,'label_noise':cm.get('label_noise'),'cache_manifest_sha256':sha256(args.cache_root/'manifest.json'),'teacher_sha256':cm['teacher']['adapter_sha256'],'memory_sha256':sha256(args.output/'memory.safetensors')})
+    atomic_json(args.output/'report.json',{'epochs':args.epochs,'train_images':len(cm['samples']),'optimization_updates':args.epochs*len(cm['samples']),'identity_train_loss':identity,'trained_train_loss':trained,'train_improvement':identity-trained,'validation_claim':'none: feature pretraining reports training fit only; final generator selects only on its validation split','events':events,'label_noise':cm.get('label_noise'),'cache_manifest_sha256':sha256(args.cache_root/'manifest.json'),'teacher_sha256':cm['teacher']['adapter_sha256'],'memory_sha256':sha256(args.output/'memory.safetensors')})
     print(json.dumps({'phase':'memory_pretrain_complete','identity_loss':identity,'trained_loss':trained}),flush=True)
 
 

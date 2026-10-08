@@ -4,7 +4,7 @@ source "$(dirname "${BASH_SOURCE[0]}")/sma_env.sh"
 EPOCHS="${1:-${EPOCHS:-20}}"
 MAX_STEPS="${MAX_STEPS:-0}"
 RUN_DIR="${RUN_DIR:-$PROJECT/runs/sma_e${EPOCHS}}"
-[[ "$EPOCHS" =~ ^[1-9][0-9]*$ && "$EPOCHS" -le 20 && "$MAX_STEPS" =~ ^[0-9]+$ ]] || exit 2
+[[ "$EPOCHS" =~ ^[1-9][0-9]*$ && "$EPOCHS" -le 50 && "$MAX_STEPS" =~ ^[0-9]+$ ]] || exit 2
 check_gpus
 IFS=',' read -r -a gpu_list <<< "$CUDA_VISIBLE_DEVICES"
 # The inherited aspect sampler and M4 accounting are intentionally fixed to 4.
