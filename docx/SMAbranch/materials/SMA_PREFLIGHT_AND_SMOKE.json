@@ -1,0 +1,219 @@
+{
+  "created_utc": "2026-10-08T08:59:39.599851+00:00",
+  "module_checks": {
+    "status": "module_checks_passed",
+    "identity_init": true,
+    "checkpoint_teacher_isolation": true,
+    "nonzero_reader_gradient": 0.004072085022926331,
+    "frozen_memory": true,
+    "checkpoint_roundtrip": true,
+    "extreme_aspect_grids": true,
+    "reader_parameters": 4610050
+  },
+  "cache": {
+    "samples": 144,
+    "gib": 5.682093948125839,
+    "max_worker_peak_gib": 16.106313705444336,
+    "teacher": {
+      "model": "Qwen/Qwen-Image-Edit-2509",
+      "adapter": "/share/linmingheng-local/xuke/RMagNet/runs/m4_best_newcache_e20_p4/best_transmission_lora.safetensors",
+      "adapter_sha256": "897282b1bb9cfe61f96530df72edcf8a44a066bb819a3663e9100862aefdb2a3",
+      "adapter_mode": "M4 best Transmission LoRA enabled; all parameters frozen",
+      "vae": "posterior mode; deterministic",
+      "flow_timestep": 499,
+      "early_blocks": [
+        16,
+        20
+      ],
+      "mid_blocks": [
+        37,
+        39,
+        41
+      ],
+      "late_blocks": [
+        52,
+        54,
+        56
+      ],
+      "hidden_size": 3072
+    },
+    "dataset_manifest_sha256": "c1e1a6e9db7bbe186d59dace597b3ce8241e22805d945aba1ddd0821e36724d2",
+    "excluded_ids": [
+      "108_421_1388"
+    ]
+  },
+  "memory_pretrain": {
+    "epochs": 5,
+    "train_images": 144,
+    "optimization_updates": 720,
+    "identity_train_loss": 0.25693541796257097,
+    "trained_train_loss": 0.22573139678893817,
+    "train_improvement": 0.0312040211736328,
+    "validation_claim": "none: feature pretraining reports training fit only; final generator selects on 18 validation images",
+    "events": [
+      {
+        "phase": "memory_pretrain",
+        "epoch": 1,
+        "loss": 0.251348985475488,
+        "identity_loss": 0.25693541796257097,
+        "elapsed_seconds": 8.73603706783615
+      },
+      {
+        "phase": "memory_pretrain",
+        "epoch": 2,
+        "loss": 0.23867091871539337,
+        "identity_loss": 0.25693541796257097,
+        "elapsed_seconds": 16.096057790797204
+      },
+      {
+        "phase": "memory_pretrain",
+        "epoch": 3,
+        "loss": 0.2330349428553341,
+        "identity_loss": 0.25693541796257097,
+        "elapsed_seconds": 23.459864581935108
+      },
+      {
+        "phase": "memory_pretrain",
+        "epoch": 4,
+        "loss": 0.22968032668965557,
+        "identity_loss": 0.25693541796257097,
+        "elapsed_seconds": 30.84793975087814
+      },
+      {
+        "phase": "memory_pretrain",
+        "epoch": 5,
+        "loss": 0.22765184240415692,
+        "identity_loss": 0.25693541796257097,
+        "elapsed_seconds": 38.21879493701272
+      }
+    ],
+    "cache_manifest_sha256": "7fd5fabfb70d536f1cbd8aac05b40b1b269c20ad2d9a9561b298fa0f67e32cf1",
+    "teacher_sha256": "897282b1bb9cfe61f96530df72edcf8a44a066bb819a3663e9100862aefdb2a3",
+    "memory_sha256": "c421ccb0fd434fb5d3e81a6f7ca565efaedfdc0c19ed079a721b09812aadaf7f"
+  },
+  "full_gpu_smoke": {
+    "world_size": 4,
+    "updates": 3,
+    "exit_code": 0,
+    "changed_saved_validation_png": 18,
+    "events": [
+      {
+        "kind": "stage2_init",
+        "step": 0,
+        "means": {
+          "l1": 0.04059963425000509,
+          "psnr": 24.12753412458632,
+          "ssim": 0.8544500271479288,
+          "lpips_squeeze": 0.10829612798988819,
+          "low_change_keep_l1": 0.02282455630807413,
+          "high_change_restore_l1": 0.07570240625904666
+        },
+        "best_updated": true
+      },
+      {
+        "kind": "train",
+        "step": 1,
+        "epoch": 0,
+        "rec_i": 0.09384484589099884,
+        "rec_p90": 0.10503937304019928,
+        "consistency_i": 0.026727821677923203,
+        "consistency_p90": 0.026727821677923203,
+        "spatial": 0.055738333612680435,
+        "spatial_restore": 0.05104229226708412,
+        "spatial_keep": 0.06982646137475967,
+        "texture_q16_q20": 0.04499943554401398,
+        "semantic_q37_q39_q41": 0.1977129578590393,
+        "semantic_content": 0.2783091366291046,
+        "semantic_relation": 0.00965517945587635,
+        "grad_norm": 0.0031735377851873636,
+        "actual_aux_base_ratio": 0.04797946289181709,
+        "spatial_scale": 0.0034214574843645096,
+        "texture_scale": 0.00011407220881665125,
+        "semantic_scale": 9.999999747378752e-05,
+        "active_gradient_tensors": 42,
+        "backbone_vae_memory_frozen": true,
+        "reader_first_update_verified": true,
+        "lr": 6.666666666666667e-05,
+        "elapsed_seconds": 7.001944174058735,
+        "peak_allocated_gib": 17.637423038482666,
+        "peak_reserved_gib": 17.87109375
+      },
+      {
+        "kind": "train",
+        "step": 2,
+        "epoch": 0,
+        "rec_i": 0.05981161817908287,
+        "rec_p90": 0.10481611639261246,
+        "consistency_i": 0.04160594940185547,
+        "consistency_p90": 0.04160594940185547,
+        "spatial": 0.0365956611931324,
+        "spatial_restore": 0.039421238005161285,
+        "spatial_keep": 0.028118934482336044,
+        "texture_q16_q20": 0.03753775730729103,
+        "semantic_q37_q39_q41": 0.2066994607448578,
+        "semantic_content": 0.290888249874115,
+        "semantic_relation": 0.010258990339934826,
+        "grad_norm": 0.0034078946337103844,
+        "actual_aux_base_ratio": 0.07999589294195175,
+        "spatial_scale": 0.0037256295327097178,
+        "texture_scale": 0.00011612741218414158,
+        "semantic_scale": 9.999999747378752e-05,
+        "active_gradient_tensors": 42,
+        "backbone_vae_memory_frozen": true,
+        "reader_first_update_verified": true,
+        "lr": 0.0001,
+        "elapsed_seconds": 12.782685901038349,
+        "peak_allocated_gib": 17.7429518699646,
+        "peak_reserved_gib": 18.001953125
+      },
+      {
+        "kind": "train",
+        "step": 3,
+        "epoch": 0,
+        "rec_i": 0.056403979659080505,
+        "rec_p90": 0.08504414558410645,
+        "consistency_i": 0.03581347316503525,
+        "consistency_p90": 0.03581347316503525,
+        "spatial": 0.03630837798118591,
+        "spatial_restore": 0.03780461102724075,
+        "spatial_keep": 0.031819675117731094,
+        "texture_q16_q20": 0.03501370549201965,
+        "semantic_q37_q39_q41": 0.166190505027771,
+        "semantic_content": 0.23381204903125763,
+        "semantic_relation": 0.008406908251345158,
+        "grad_norm": 0.0038557937368750572,
+        "actual_aux_base_ratio": 0.0907001718878746,
+        "spatial_scale": 0.004249299876391888,
+        "texture_scale": 0.00011502751294756308,
+        "semantic_scale": 9.999999747378752e-05,
+        "active_gradient_tensors": 42,
+        "backbone_vae_memory_frozen": true,
+        "reader_first_update_verified": true,
+        "lr": 0.0001,
+        "elapsed_seconds": 18.059766156133264,
+        "peak_allocated_gib": 17.7429518699646,
+        "peak_reserved_gib": 18.001953125
+      },
+      {
+        "kind": "final_validation",
+        "step": 3,
+        "epoch": 0,
+        "means": {
+          "l1": 0.04061893166767226,
+          "psnr": 24.127641042073567,
+          "ssim": 0.854416721396976,
+          "lpips_squeeze": 0.10837514201800029,
+          "low_change_keep_l1": 0.022953808980269566,
+          "high_change_restore_l1": 0.0754871413939529
+        },
+        "best_updated": false
+      }
+    ]
+  },
+  "invalid_first_smoke": {
+    "reason": "absolute hidden-state residual swallowed by BF16",
+    "reader_gradient_norm_approx": 1e-09,
+    "changed_validation_png": 0
+  },
+  "formal_initialization": "fixed M4 + pretrained memory + zero-initialized readers; smoke reader weights not reused"
+}
