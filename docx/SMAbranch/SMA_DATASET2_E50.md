@@ -1,7 +1,7 @@
 # SMA data_set2 / 50 epoch
 
 ## 当前状态
-错配实验 runs 已清理，记录保存在 `results_archive/SMA_gtnoise5/`。新数据已上传且 SHA-256 一致。用户已明确确认新数据 `_GT.jpg` 为GT、无后缀JPEG为输入，并选择与旧数据合并。256组数据已完成校验和划分；144个旧训练缓存按哈希硬链接复用，剩余60个待提取。
+错配实验 runs 已清理，记录保存在 `results_archive/SMA_gtnoise5/`。新数据已上传且 SHA-256 一致。用户已明确确认新数据 `_GT.jpg` 为GT、无后缀JPEG为输入，并选择与旧数据合并。256组数据已完成校验和划分；144个旧训练缓存按哈希硬链接复用，新增60个也已提取并完成校验，204个训练缓存齐全。新的PCA/memory仅用训练集拟合，5个feature epoch已完成，正式训练正在启动。
 
 ## 数据审计
 - 本地源：`D:/Develop/PhotoManager/data_set2`，308 文件 / 77 组 / 46 拍摄编号，约 38 MB。
@@ -44,3 +44,9 @@ RGB Lanczos、DoLP BOX；不裁剪、不补边、不放大；约 512×384 像素
 
 ## 已完成的检查
 Python语法编译、bash -n、确定性分组划分、四卡整epoch覆盖条件、新旧编号不重叠、上传哈希一致。已核验全部新样本标签映射、旧划分保持、四图哈希、尺寸/模式和50个epoch的逐样本恰好一次采样；审计见 `materials/SMA_DATASET2_DATA_AUDIT.json`。GPU缓存与正式训练启动状态见后续launch记录。
+
+## 本轮实际缓存与memory
+
+逻辑缓存7.801 GiB；旧144个使用硬链接，无新增副本，新增60个共2275616660字节（约2.119GiB）。缓存提取显存峰值16.106GiB。Memory预训练204样本×5epoch=1020次轻量更新，训练拟合损失从0.303368降至0.268360；这仅是训练拟合记录，不代表验证/测试质量提高。
+
+逐图划分、尺寸与四图路径见 `materials/dataset2_split_index.csv`；缓存和memory哈希见 `materials/SMA_DATASET2_CACHE.json`。

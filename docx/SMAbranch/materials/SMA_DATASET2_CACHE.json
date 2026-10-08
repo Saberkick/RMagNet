@@ -1,0 +1,62 @@
+{
+  "dataset": "/share/linmingheng-local/xuke/datasets/rmagnet_sma_dataset2",
+  "cache_complete": true,
+  "train_samples": 204,
+  "cache_manifest_sha256": "63063ae70df861d809c4a37695ae9a3084d79a3d7fa6e15cf6921dd1f9637f27",
+  "teacher_sha256": "897282b1bb9cfe61f96530df72edcf8a44a066bb819a3663e9100862aefdb2a3",
+  "cache_logical_gib": 7.801427114754915,
+  "reused_samples": 144,
+  "new_samples": 60,
+  "new_cache_bytes": 2275616660,
+  "cache_peak_gib": 16.106313705444336,
+  "memory_pretrain": {
+    "epochs": 5,
+    "train_images": 204,
+    "optimization_updates": 1020,
+    "identity_train_loss": 0.3033678705128385,
+    "trained_train_loss": 0.26835962724598017,
+    "train_improvement": 0.03500824326685831,
+    "validation_claim": "none: feature pretraining reports training fit only; final generator selects only on its validation split",
+    "events": [
+      {
+        "phase": "memory_pretrain",
+        "epoch": 1,
+        "loss": 0.2955548891651572,
+        "identity_loss": 0.3033678705128385,
+        "elapsed_seconds": 10.277029147138819
+      },
+      {
+        "phase": "memory_pretrain",
+        "epoch": 2,
+        "loss": 0.2812930601466374,
+        "identity_loss": 0.3033678705128385,
+        "elapsed_seconds": 20.507727358024567
+      },
+      {
+        "phase": "memory_pretrain",
+        "epoch": 3,
+        "loss": 0.2759357160322514,
+        "identity_loss": 0.3033678705128385,
+        "elapsed_seconds": 30.753714895108715
+      },
+      {
+        "phase": "memory_pretrain",
+        "epoch": 4,
+        "loss": 0.27270205181968565,
+        "identity_loss": 0.3033678705128385,
+        "elapsed_seconds": 41.00465882522985
+      },
+      {
+        "phase": "memory_pretrain",
+        "epoch": 5,
+        "loss": 0.2703697001287604,
+        "identity_loss": 0.3033678705128385,
+        "elapsed_seconds": 51.26507083908655
+      }
+    ],
+    "label_noise": null,
+    "cache_manifest_sha256": "63063ae70df861d809c4a37695ae9a3084d79a3d7fa6e15cf6921dd1f9637f27",
+    "teacher_sha256": "897282b1bb9cfe61f96530df72edcf8a44a066bb819a3663e9100862aefdb2a3",
+    "memory_sha256": "368a9ff45bf79095650ac1bd5c582e77401d2714e867c4466cac3e9a18928e7b"
+  }
+}

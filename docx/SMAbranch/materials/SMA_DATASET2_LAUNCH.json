@@ -1,0 +1,73 @@
+{
+  "time_utc": "2026-10-08T14:52:42.247598+00:00",
+  "status": "stable_background_training",
+  "tmux": "sma_dataset2_e50",
+  "gpus": "0,1,2,3",
+  "epochs": 50,
+  "planned_steps": 2550,
+  "verified_updates": 35,
+  "last_step": 35,
+  "peak_allocated_gib": 17.891308307647705,
+  "frozen_checks_passed": true,
+  "reader_updates_verified": true,
+  "all_train_values_finite": true,
+  "wrong_gt_count": 0,
+  "four_rank_workers_excluding_dataloader_children": {
+    "251240": [
+      251236,
+      "/share/linmingheng-local/xuke/envs/windowseat-py312/bin/python -u -m src.rmagnet.sma_train --data-root /share/linmingheng-local/xuke/datasets/rmagnet_sma_dataset2 --cache-root /share/linmingheng-local/xuke/RMagNet/data_cache/sma_dataset2_v1 --initial /share/linmingheng-local/xuke/RMagNet/runs/m4_best_newcache_e20_p4/best_transmission_lora.safetensors --initial-sha256 897282b1bb9cfe61f96530df72edcf8a44a066bb819a3663e9100862aefdb2a3 --memory-file /share/linmingheng-local/xuke/RMagNet/runs/sma_dataset2_memory_pretrain/memory.safetensors --run-dir /share/linmingheng-local/xuke/RMagNet/runs/sma_dataset2_e50 --epochs 50 --max-steps 0 --early-stopping-patience 0 --learning-rate 1e-4 --warmup-steps 20 --gradient-ramp-steps 36 --spatial-gradient-ratio .08 --texture-gradient-ratio .08 --semantic-gradient-ratio .08 --aux-gradient-cap .25 --consistency-coefficient .10 --ssim-weight .2 --edge-weight .1 --num-workers 1"
+    ],
+    "251241": [
+      251236,
+      "/share/linmingheng-local/xuke/envs/windowseat-py312/bin/python -u -m src.rmagnet.sma_train --data-root /share/linmingheng-local/xuke/datasets/rmagnet_sma_dataset2 --cache-root /share/linmingheng-local/xuke/RMagNet/data_cache/sma_dataset2_v1 --initial /share/linmingheng-local/xuke/RMagNet/runs/m4_best_newcache_e20_p4/best_transmission_lora.safetensors --initial-sha256 897282b1bb9cfe61f96530df72edcf8a44a066bb819a3663e9100862aefdb2a3 --memory-file /share/linmingheng-local/xuke/RMagNet/runs/sma_dataset2_memory_pretrain/memory.safetensors --run-dir /share/linmingheng-local/xuke/RMagNet/runs/sma_dataset2_e50 --epochs 50 --max-steps 0 --early-stopping-patience 0 --learning-rate 1e-4 --warmup-steps 20 --gradient-ramp-steps 36 --spatial-gradient-ratio .08 --texture-gradient-ratio .08 --semantic-gradient-ratio .08 --aux-gradient-cap .25 --consistency-coefficient .10 --ssim-weight .2 --edge-weight .1 --num-workers 1"
+    ],
+    "251242": [
+      251236,
+      "/share/linmingheng-local/xuke/envs/windowseat-py312/bin/python -u -m src.rmagnet.sma_train --data-root /share/linmingheng-local/xuke/datasets/rmagnet_sma_dataset2 --cache-root /share/linmingheng-local/xuke/RMagNet/data_cache/sma_dataset2_v1 --initial /share/linmingheng-local/xuke/RMagNet/runs/m4_best_newcache_e20_p4/best_transmission_lora.safetensors --initial-sha256 897282b1bb9cfe61f96530df72edcf8a44a066bb819a3663e9100862aefdb2a3 --memory-file /share/linmingheng-local/xuke/RMagNet/runs/sma_dataset2_memory_pretrain/memory.safetensors --run-dir /share/linmingheng-local/xuke/RMagNet/runs/sma_dataset2_e50 --epochs 50 --max-steps 0 --early-stopping-patience 0 --learning-rate 1e-4 --warmup-steps 20 --gradient-ramp-steps 36 --spatial-gradient-ratio .08 --texture-gradient-ratio .08 --semantic-gradient-ratio .08 --aux-gradient-cap .25 --consistency-coefficient .10 --ssim-weight .2 --edge-weight .1 --num-workers 1"
+    ],
+    "251243": [
+      251236,
+      "/share/linmingheng-local/xuke/envs/windowseat-py312/bin/python -u -m src.rmagnet.sma_train --data-root /share/linmingheng-local/xuke/datasets/rmagnet_sma_dataset2 --cache-root /share/linmingheng-local/xuke/RMagNet/data_cache/sma_dataset2_v1 --initial /share/linmingheng-local/xuke/RMagNet/runs/m4_best_newcache_e20_p4/best_transmission_lora.safetensors --initial-sha256 897282b1bb9cfe61f96530df72edcf8a44a066bb819a3663e9100862aefdb2a3 --memory-file /share/linmingheng-local/xuke/RMagNet/runs/sma_dataset2_memory_pretrain/memory.safetensors --run-dir /share/linmingheng-local/xuke/RMagNet/runs/sma_dataset2_e50 --epochs 50 --max-steps 0 --early-stopping-patience 0 --learning-rate 1e-4 --warmup-steps 20 --gradient-ramp-steps 36 --spatial-gradient-ratio .08 --texture-gradient-ratio .08 --semantic-gradient-ratio .08 --aux-gradient-cap .25 --consistency-coefficient .10 --ssim-weight .2 --edge-weight .1 --num-workers 1"
+    ]
+  },
+  "dataset_sha256": "8aa57d9aa5536aab2a03dd7525a5006878a3e7f7c24c4ccb977c2ea6a4b4b1ad",
+  "cache_sha256": "63063ae70df861d809c4a37695ae9a3084d79a3d7fa6e15cf6921dd1f9637f27",
+  "fixed_m4_sha256": "897282b1bb9cfe61f96530df72edcf8a44a066bb819a3663e9100862aefdb2a3",
+  "runtime_git_commit": "0e7565f548f04beb3396b0c4f40d4e2005d27ac2",
+  "checkpoint_policy": "best/latest only; latest first saved after epoch 1 validation",
+  "last_train_event": {
+    "kind": "train",
+    "step": 35,
+    "epoch": 0,
+    "noisy_gt_samples_in_update": 0,
+    "rec_i": 0.11475414782762527,
+    "rec_p90": 0.15623821318149567,
+    "consistency_i": 0.049643371254205704,
+    "consistency_p90": 0.049643371254205704,
+    "spatial": 0.06620161235332489,
+    "spatial_restore": 0.0672893077135086,
+    "spatial_keep": 0.06293852627277374,
+    "texture_q16_q20": 0.07022140175104141,
+    "semantic_q37_q39_q41": 0.33396703004837036,
+    "semantic_content": 0.4675595164299011,
+    "semantic_relation": 0.022251242771744728,
+    "grad_norm": 0.04798057675361633,
+    "actual_aux_base_ratio": 0.17224963009357452,
+    "spatial_scale": 0.09494654834270477,
+    "texture_scale": 0.0009856738615781069,
+    "semantic_scale": 0.0001716411206871271,
+    "active_gradient_tensors": 42,
+    "backbone_vae_memory_frozen": true,
+    "reader_first_update_verified": true,
+    "lr": 9.999132701342811e-05,
+    "elapsed_seconds": 204.4472037970554,
+    "peak_allocated_gib": 17.891308307647705,
+    "peak_reserved_gib": 18.1484375
+  },
+  "removed_loaded_memory_initialization": {
+    "path": "runs/sma_dataset2_memory_pretrain/memory.safetensors",
+    "bytes": 28252648,
+    "sha256": "368a9ff45bf79095650ac1bd5c582e77401d2714e867c4466cac3e9a18928e7b",
+    "reason": "All four ranks loaded; best contains full SMA state; report retained"
+  }
+}
