@@ -38,6 +38,9 @@ def load_manifest(root):
                 with Image.open(p) as im:
                     if im.size != (w,h) or im.mode != ("L" if role=="dolp" else "RGB"):
                         raise RuntimeError(f"Source geometry/mode mismatch: {sid}/{role}")
+    if manifest.get("label_noise"):
+        from .sma_gtnoise import audit_overlay
+        audit_overlay(root, manifest, records, splits)
     return manifest, records, splits
 
 

@@ -234,6 +234,7 @@ def finalize(args: argparse.Namespace) -> None:
     result["sma_cache_version"] = 1
     result["sma_extra_features"] = ["q37_input", "q37_p90"]
     result["dataset_exclusions"] = dataset_manifest.get("excluded_samples", [])
+    result["label_noise"] = dataset_manifest.get("label_noise")
     atomic_json(output / "manifest.json", result)
     print(json.dumps({"status": "complete", "samples": len(records), "total_gib": round(total_bytes / 2**30, 3), "adapter_sha256": adapter_sha, "manifest": str(output / "manifest.json")}, indent=2), flush=True)
 

@@ -12,6 +12,7 @@ export OMP_NUM_THREADS="${OMP_NUM_THREADS:-1}" PYTHONUNBUFFERED=1
 export PYTORCH_CUDA_ALLOC_CONF="expandable_segments:True,garbage_collection_threshold:0.80"
 export CUDA_VISIBLE_DEVICES="${CUDA_VISIBLE_DEVICES:-0,1,2,3}"
 CACHE_ROOT="${CACHE_ROOT:-$PROJECT/data_cache/sma_m4final_v1}"
+DATA_ROOT="${DATA_ROOT:-$ROOT/datasets/rmagnet_m2_aspect}"
 MEMORY_DIR="${MEMORY_DIR:-$PROJECT/runs/sma_memory_pretrain}"
 INITIAL="$PROJECT/runs/m4_best_newcache_e20_p4/best_transmission_lora.safetensors"
 EXPECTED_INITIAL=897282b1bb9cfe61f96530df72edcf8a44a066bb819a3663e9100862aefdb2a3

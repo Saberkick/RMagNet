@@ -127,6 +127,7 @@ class M4Dataset(Dataset):
             "late_agreement": stored["late_agreement"].float(),
             "token_grid": torch.tensor([grid_h, grid_w], dtype=torch.int32),
             "bucket": record["aspect_bucket"],
+            "intentional_noisy_gt": "intentional_wrong_gt_donor" in record,
         }
         for block in EARLY_BLOCKS:
             result[f"q{block}_input"] = stored[f"q{block}_input"]
@@ -550,6 +551,7 @@ def main() -> None:
     preflight = {
         "status": "preflight_ok",
         "experiment": "SMA-clean-semantic-memory",
+        "label_noise": manifest.get("label_noise"),
         "train": len(train_data),
         "validation": len(val_data),
         "sealed_test": len(splits["test"]),
@@ -621,6 +623,9 @@ def main() -> None:
     if memory_report["memory_sha256"] != sha256(args.memory_file):
         raise RuntimeError("Pretrained memory checksum mismatch")
     sma.load_state_dict(safetensors.torch.load_file(args.memory_file, device=str(device)), strict=True)
+    if any(torch.count_nonzero(reader.up.weight) or torch.count_nonzero(reader.up.bias)
+           for reader in sma.readers.values()):
+        raise RuntimeError("Fresh SMA training requires zero-output readers, not a trained checkpoint")
     sma.freeze_memory()
     runtime = install(backend, sma)
     parameters = list(sma.readers.parameters())
@@ -894,11 +899,14 @@ def main() -> None:
             )
             dist.all_reduce(values)
             values.div_(world_size())
+            noisy_count = batch["intentional_noisy_gt"].to(device, dtype=torch.int32).sum()
+            dist.all_reduce(noisy_count)
             if is_main:
                 event = {
                     "kind": "train",
                     "step": global_step,
                     "epoch": epoch,
+                    "noisy_gt_samples_in_update": int(noisy_count.item()),
                     "rec_i": float(values[0]),
                     "rec_p90": float(values[1]),
                     "consistency_i": float(values[2]),

@@ -9,7 +9,7 @@ check_gpus
 IFS=',' read -r -a gpu_list <<< "$CUDA_VISIBLE_DEVICES"
 # The inherited aspect sampler and M4 accounting are intentionally fixed to 4.
 (( ${#gpu_list[@]} == 4 )) || { echo 'This first SMA training implementation requires exactly four GPUs' >&2; exit 3; }
-args=(--cache-root "$CACHE_ROOT" --initial "$INITIAL" --initial-sha256 "$EXPECTED_INITIAL"
+args=(--data-root "$DATA_ROOT" --cache-root "$CACHE_ROOT" --initial "$INITIAL" --initial-sha256 "$EXPECTED_INITIAL"
   --memory-file "$MEMORY_DIR/memory.safetensors" --run-dir "$RUN_DIR"
   --epochs "$EPOCHS" --max-steps "$MAX_STEPS" --early-stopping-patience "${EARLY_STOPPING_PATIENCE:-0}"
   --learning-rate "${LEARNING_RATE:-1e-4}" --warmup-steps 20 --gradient-ramp-steps 36
