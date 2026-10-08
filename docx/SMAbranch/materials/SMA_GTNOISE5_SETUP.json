@@ -1,0 +1,78 @@
+{
+  "status": "passed",
+  "label_noise": {
+    "type": "fixed-training-GT-replacement-v1",
+    "count": 7,
+    "requested_fraction": 0.05,
+    "actual_fraction": 0.04861111111111111,
+    "seed": 20261008,
+    "mapping": {
+      "147_5210_2339": "11_2740_2318",
+      "112_546_2213": "41_1020_1542",
+      "29_1776_1369": "37_910_682",
+      "136_3402_2894": "85_2941_2253",
+      "120_1396_789": "16_1479_2141",
+      "146_4478_2989": "84_3385_2016",
+      "116_2241_2313": "90_1738_1541"
+    },
+    "eligible_recipients": 117,
+    "selection": "uniform among training samples with a different-capture exact-size donor",
+    "donors": "training split only; fixed for all four epochs; donor reuse permitted",
+    "source_data_root": "/share/linmingheng-local/xuke/datasets/rmagnet_m2_aspect",
+    "source_manifest_sha256": "c1e1a6e9db7bbe186d59dace597b3ce8241e22805d945aba1ddd0821e36724d2",
+    "validation_changed": false,
+    "test_changed": false,
+    "created_at_utc": "2026-10-08T11:57:33.900009+00:00"
+  },
+  "GT_feature_checks": [
+    {
+      "id": "147_5210_2339",
+      "donor": "11_2740_2318",
+      "all_GT_features_bitwise_match_clean_donor": true
+    },
+    {
+      "id": "112_546_2213",
+      "donor": "41_1020_1542",
+      "all_GT_features_bitwise_match_clean_donor": true
+    },
+    {
+      "id": "29_1776_1369",
+      "donor": "37_910_682",
+      "all_GT_features_bitwise_match_clean_donor": true
+    },
+    {
+      "id": "136_3402_2894",
+      "donor": "85_2941_2253",
+      "all_GT_features_bitwise_match_clean_donor": true
+    },
+    {
+      "id": "120_1396_789",
+      "donor": "16_1479_2141",
+      "all_GT_features_bitwise_match_clean_donor": true
+    },
+    {
+      "id": "146_4478_2989",
+      "donor": "84_3385_2016",
+      "all_GT_features_bitwise_match_clean_donor": true
+    },
+    {
+      "id": "116_2241_2313",
+      "donor": "90_1738_1541",
+      "all_GT_features_bitwise_match_clean_donor": true
+    }
+  ],
+  "hardlinked_unchanged_caches": 137,
+  "changed_caches": 7,
+  "new_cache_array_bytes": 295753388,
+  "noisy_samples_per_epoch": [
+    7,
+    7,
+    7,
+    7
+  ],
+  "updates_per_epoch": 36,
+  "planned_updates": 144,
+  "dataset_manifest_sha256": "1008757a99d4cc26088b974d827ba8e1d5fdd9c7f32bcd6d2ee3c85d6fb65fbf",
+  "cache_manifest_sha256": "2f33d481117aabd22be505ef4de9d174e5b434d61d051818e10b17e0c3167c9f",
+  "validation_test_labels_unchanged": true
+}
