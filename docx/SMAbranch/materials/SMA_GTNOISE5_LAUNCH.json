@@ -1,0 +1,209 @@
+{
+  "time_utc": "2026-10-08T12:04:58.856458+00:00",
+  "training_code_commit": "5ff8e48a9ca76ce0537defc3799965ee7db08b2f",
+  "epochs": 4,
+  "planned_steps": 144,
+  "verified_updates": 14,
+  "noisy_samples_seen_so_far": 2,
+  "latest_verified_update": {
+    "kind": "train",
+    "step": 14,
+    "epoch": 0,
+    "noisy_gt_samples_in_update": 0,
+    "rec_i": 0.05517992377281189,
+    "rec_p90": 0.07533447444438934,
+    "consistency_i": 0.024115193635225296,
+    "consistency_p90": 0.024115193635225296,
+    "spatial": 0.039754629135131836,
+    "spatial_restore": 0.034075263887643814,
+    "spatial_keep": 0.0567927286028862,
+    "texture_q16_q20": 0.050653379410505295,
+    "semantic_q37_q39_q41": 0.2103550136089325,
+    "semantic_content": 0.29592323303222656,
+    "semantic_relation": 0.010695845820009708,
+    "grad_norm": 0.002561397384852171,
+    "actual_aux_base_ratio": 0.06803826242685318,
+    "spatial_scale": 0.026607666164636612,
+    "texture_scale": 0.00030009273905307055,
+    "semantic_scale": 0.00010148753790417686,
+    "active_gradient_tensors": 42,
+    "backbone_vae_memory_frozen": true,
+    "reader_first_update_verified": true,
+    "lr": 7.500000000000001e-05,
+    "elapsed_seconds": 82.11767459986731,
+    "peak_allocated_gib": 17.88573455810547,
+    "peak_reserved_gib": 18.142578125
+  },
+  "initial_validation_identical_to_original_M4": true,
+  "GPU_snapshot": "0, 16188 MiB, 100 %\n1, 16244 MiB, 100 %\n2, 16182 MiB, 100 %\n3, 16162 MiB, 100 %",
+  "memory_pretraining": {
+    "epochs": 5,
+    "train_images": 144,
+    "optimization_updates": 720,
+    "identity_train_loss": 0.28235963949312765,
+    "trained_train_loss": 0.2523824542036487,
+    "train_improvement": 0.029977185289478958,
+    "validation_claim": "none: feature pretraining reports training fit only; final generator selects on 18 validation images",
+    "events": [
+      {
+        "phase": "memory_pretrain",
+        "epoch": 1,
+        "loss": 0.2772082657320425,
+        "identity_loss": 0.28235963949312765,
+        "elapsed_seconds": 7.316989773884416
+      },
+      {
+        "phase": "memory_pretrain",
+        "epoch": 2,
+        "loss": 0.265356865996081,
+        "identity_loss": 0.28235963949312765,
+        "elapsed_seconds": 14.601981018902734
+      },
+      {
+        "phase": "memory_pretrain",
+        "epoch": 3,
+        "loss": 0.2597522902587015,
+        "identity_loss": 0.28235963949312765,
+        "elapsed_seconds": 21.880664658965543
+      },
+      {
+        "phase": "memory_pretrain",
+        "epoch": 4,
+        "loss": 0.25632891290458953,
+        "identity_loss": 0.28235963949312765,
+        "elapsed_seconds": 28.768957546912134
+      },
+      {
+        "phase": "memory_pretrain",
+        "epoch": 5,
+        "loss": 0.2541940380922622,
+        "identity_loss": 0.28235963949312765,
+        "elapsed_seconds": 36.042070648865774
+      }
+    ],
+    "label_noise": {
+      "type": "fixed-training-GT-replacement-v1",
+      "count": 7,
+      "requested_fraction": 0.05,
+      "actual_fraction": 0.04861111111111111,
+      "seed": 20261008,
+      "mapping": {
+        "147_5210_2339": "11_2740_2318",
+        "112_546_2213": "41_1020_1542",
+        "29_1776_1369": "37_910_682",
+        "136_3402_2894": "85_2941_2253",
+        "120_1396_789": "16_1479_2141",
+        "146_4478_2989": "84_3385_2016",
+        "116_2241_2313": "90_1738_1541"
+      },
+      "eligible_recipients": 117,
+      "selection": "uniform among training samples with a different-capture exact-size donor",
+      "donors": "training split only; fixed for all four epochs; donor reuse permitted",
+      "source_data_root": "/share/linmingheng-local/xuke/datasets/rmagnet_m2_aspect",
+      "source_manifest_sha256": "c1e1a6e9db7bbe186d59dace597b3ce8241e22805d945aba1ddd0821e36724d2",
+      "validation_changed": false,
+      "test_changed": false,
+      "created_at_utc": "2026-10-08T11:57:33.900009+00:00"
+    },
+    "cache_manifest_sha256": "2f33d481117aabd22be505ef4de9d174e5b434d61d051818e10b17e0c3167c9f",
+    "teacher_sha256": "897282b1bb9cfe61f96530df72edcf8a44a066bb819a3663e9100862aefdb2a3",
+    "memory_sha256": "da9ac20b537769691345de56abe0e57464085080c0e95debdbffcb8f57a3a6a5"
+  },
+  "cleanup": {
+    "time_utc": "2026-10-08T11:52:57.451655+00:00",
+    "removed": [
+      {
+        "path": "/share/linmingheng-local/xuke/RMagNet/runs/sma_smoke",
+        "bytes": 63806846
+      },
+      {
+        "path": "/share/linmingheng-local/xuke/RMagNet/runs/sma_smoke_rms",
+        "bytes": 63805378
+      },
+      {
+        "path": "/share/linmingheng-local/xuke/rmagnet_sma_source.tgz",
+        "bytes": 445112
+      },
+      {
+        "path": "/share/linmingheng-local/xuke/sma_initial_patch.tgz",
+        "bytes": 19960
+      },
+      {
+        "path": "/share/linmingheng-local/xuke/sma_second_patch.tgz",
+        "bytes": 14178
+      },
+      {
+        "path": "/share/linmingheng-local/xuke/sma_final_patch.tgz",
+        "bytes": 23703
+      },
+      {
+        "path": "/share/linmingheng-local/xuke/sma_training_ready.tgz",
+        "bytes": 20374
+      },
+      {
+        "path": "/share/linmingheng-local/xuke/sma_rms_patch.tgz",
+        "bytes": 19713
+      },
+      {
+        "path": "/share/linmingheng-local/xuke/sma_launch_patch.tgz",
+        "bytes": 22422
+      },
+      {
+        "path": "/share/linmingheng-local/xuke/RMagNet/runs/sma_launch/prepare.console.log",
+        "bytes": 1091
+      },
+      {
+        "path": "/share/linmingheng-local/xuke/RMagNet/runs/sma_launch/prepare.debug.log",
+        "bytes": 3083
+      },
+      {
+        "path": "/share/linmingheng-local/xuke/RMagNet/runs/sma_launch/module_checks.log",
+        "bytes": 258
+      },
+      {
+        "path": "/share/linmingheng-local/xuke/RMagNet/runs/sma_launch/prepare.exitcode",
+        "bytes": 2
+      },
+      {
+        "path": "/share/linmingheng-local/xuke/RMagNet/runs/sma_launch/smoke.console.log",
+        "bytes": 13153
+      },
+      {
+        "path": "/share/linmingheng-local/xuke/RMagNet/runs/sma_launch/smoke.exitcode",
+        "bytes": 2
+      },
+      {
+        "path": "/share/linmingheng-local/xuke/RMagNet/runs/sma_launch/hidden_scale_check.log",
+        "bytes": 278
+      },
+      {
+        "path": "/share/linmingheng-local/xuke/RMagNet/runs/sma_launch/module_checks_rms.log",
+        "bytes": 258
+      },
+      {
+        "path": "/share/linmingheng-local/xuke/RMagNet/runs/sma_launch/smoke_rms.console.log",
+        "bytes": 13201
+      },
+      {
+        "path": "/share/linmingheng-local/xuke/RMagNet/runs/sma_launch/smoke_rms.exitcode",
+        "bytes": 2
+      },
+      {
+        "path": "/share/linmingheng-local/xuke/RMagNet/runs/sma_memory_pretrain/memory.safetensors",
+        "bytes": 28252648
+      },
+      {
+        "path": "/share/linmingheng-local/xuke/RMagNet/runs/sma_gtnoise5_memory_pretrain/memory.safetensors",
+        "bytes": 28252648
+      },
+      {
+        "path": "/share/linmingheng-local/xuke/sma_gtnoise_patch.tgz",
+        "bytes": 25746
+      }
+    ],
+    "total_removed_bytes": 184740056,
+    "retained": "Original/new best/latest, all validation/test metrics and images, cache arrays and manifests, memory pretraining reports; only initialization weights removed after all four ranks loaded them."
+  },
+  "tmux_session": "sma_gtnoise5_e4",
+  "status_at_handoff": "running_stably"
+}
