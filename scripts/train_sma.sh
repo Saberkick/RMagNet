@@ -16,6 +16,7 @@ args=(--data-root "$DATA_ROOT" --cache-root "$CACHE_ROOT" --initial "$INITIAL" -
   --spatial-gradient-ratio .08 --texture-gradient-ratio .08 --semantic-gradient-ratio .08
   --aux-gradient-cap .25 --consistency-coefficient .10 --ssim-weight .2 --edge-weight .1
   --num-workers "${NUM_WORKERS:-1}")
+if [[ -n "${CONTINUE_RUN:-}" ]]; then args+=(--continue-run "$CONTINUE_RUN"); fi
 uvpython -m src.rmagnet.sma_train "${args[@]}" --preflight-only
 exec "$UV_BIN" run --no-project --python "$ENVIRONMENT/bin/python" \
   python -m torch.distributed.run --standalone --nproc_per_node=4 -m src.rmagnet.sma_train "${args[@]}"

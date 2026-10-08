@@ -514,6 +514,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--seed", type=int, default=2026)
     parser.add_argument("--num-workers", type=int, default=1)
     parser.add_argument("--memory-file", type=Path, default=PROJECT / "runs/sma_memory_pretrain/memory.safetensors")
+    parser.add_argument("--continue-run", type=Path, help="Completed parent run; restore latest weights only, epochs denotes cumulative target")
     parser.add_argument("--preflight-only", action="store_true")
     return parser.parse_args()
 
@@ -541,6 +542,13 @@ def main() -> None:
     )
     batches = grouped_global_batches(train_data, args.seed, 0, 4)
     updates_per_epoch = len(batches)
+    continuation = None
+    if args.continue_run:
+        from .sma_continue import audit_parent
+        continuation = audit_parent(args.continue_run, args.data_root, args.cache_root,
+                                    args.initial_sha256, updates_per_epoch, args.epochs)
+    initial_step = continuation['initial_global_step'] if continuation else 0
+    start_epoch = continuation['completed_epochs'] if continuation else 0
     full_schedule_steps = updates_per_epoch * args.epochs
     planned_steps = (
         min(args.max_steps, full_schedule_steps)
@@ -548,6 +556,8 @@ def main() -> None:
         else full_schedule_steps
     )
     validate_every = args.validate_every or updates_per_epoch
+    if planned_steps <= initial_step:
+        raise ValueError("The cumulative step target must exceed the parent latest step")
     preflight = {
         "status": "preflight_ok",
         "experiment": "SMA-clean-semantic-memory",
@@ -559,6 +569,9 @@ def main() -> None:
         "updates_per_epoch": updates_per_epoch,
         "epochs": args.epochs,
         "planned_steps": planned_steps,
+        "initial_global_step": initial_step,
+        "new_optimizer_updates": planned_steps-initial_step,
+        "continuation": continuation,
         "validate_every": validate_every,
         "early_stopping_patience_epochs": args.early_stopping_patience,
         "checkpoint_policy": "best/latest SMA only; fixed M4 weights referenced by SHA256",
@@ -576,7 +589,7 @@ def main() -> None:
             "combined_cap": args.aux_gradient_cap,
         },
     }
-    if not args.memory_file.is_file(): raise FileNotFoundError(args.memory_file)
+    if not continuation and not args.memory_file.is_file(): raise FileNotFoundError(args.memory_file)
     if cache_manifest["teacher"].get("adapter_sha256") != args.initial_sha256:
         raise RuntimeError("Output teacher cache must match frozen final M4")
     if args.preflight_only:
@@ -617,15 +630,22 @@ def main() -> None:
     load_initial(backend, args.initial, device)
     backend.set_trainable_branch(None)
     sma = SMA().to(device)
-    memory_report = json.loads((args.memory_file.parent / "report.json").read_text())
-    if memory_report["teacher_sha256"] != initial_sha or memory_report["cache_manifest_sha256"] != sha256(args.cache_root / "manifest.json"):
-        raise RuntimeError("Memory / teacher / cache identity mismatch")
-    if memory_report["memory_sha256"] != sha256(args.memory_file):
-        raise RuntimeError("Pretrained memory checksum mismatch")
-    sma.load_state_dict(safetensors.torch.load_file(args.memory_file, device=str(device)), strict=True)
-    if any(torch.count_nonzero(reader.up.weight) or torch.count_nonzero(reader.up.bias)
-           for reader in sma.readers.values()):
-        raise RuntimeError("Fresh SMA training requires zero-output readers, not a trained checkpoint")
+    if continuation:
+        initial_sma_path = Path(continuation['checkpoint'])
+        if sha256(initial_sma_path) != continuation['checkpoint_sha256']:
+            raise RuntimeError('Parent checkpoint changed before load')
+    else:
+        initial_sma_path = args.memory_file
+        memory_report = json.loads((args.memory_file.parent / "report.json").read_text())
+        if memory_report["teacher_sha256"] != initial_sha or memory_report["cache_manifest_sha256"] != sha256(args.cache_root / "manifest.json"):
+            raise RuntimeError("Memory / teacher / cache identity mismatch")
+        if memory_report["memory_sha256"] != sha256(args.memory_file):
+            raise RuntimeError("Pretrained memory checksum mismatch")
+    sma.load_state_dict(safetensors.torch.load_file(initial_sma_path, device=str(device)), strict=True)
+    nonzero_reads = any(torch.count_nonzero(reader.up.weight) or torch.count_nonzero(reader.up.bias)
+                        for reader in sma.readers.values())
+    if bool(nonzero_reads) != bool(continuation):
+        raise RuntimeError('Fresh readers must be zero; continued readers must contain trained weights')
     sma.freeze_memory()
     runtime = install(backend, sma)
     parameters = list(sma.readers.parameters())
@@ -640,7 +660,7 @@ def main() -> None:
         parameters, lr=args.learning_rate, weight_decay=args.weight_decay
     )
     scheduler = make_scheduler(
-        optimizer, min(args.warmup_steps, planned_steps), planned_steps
+        optimizer, min(args.warmup_steps, planned_steps-initial_step), planned_steps-initial_step
     )
     controller = GradientController(
         {
@@ -678,7 +698,8 @@ def main() -> None:
             "gradient_control": preflight["auxiliary_gradient_targets"],
             "memory_strategy": "frozen clean memory at Q37, explicit reads after Q39/Q41; same-M4 teacher VJP then checkpoint-safe generator recomputation",
             "trainable_parameters": sum(p.numel() for p in parameters),
-            "memory_file_sha256": sha256(args.memory_file),
+            "memory_file_sha256": sha256(initial_sma_path),
+            "continuation": continuation,
             "sma_architecture": SMA_VERSION,
             "m4_frozen": True,
             "memory_frozen": True,
@@ -691,33 +712,44 @@ def main() -> None:
 
     dist.barrier()
     if is_main:
+        if continuation:
+            parent = Path(continuation['parent_run'])
+            for name in ('best_sma.safetensors', 'best_metrics.json'):
+                shutil.copy2(parent/name, args.run_dir/name)
+            shutil.copytree(parent/'best_validation', args.run_dir/'best_validation')
         baseline = validate(
-            backend, val_loader, device, lpips_model, args.run_dir, 0, args.seed
+            backend, val_loader, device, lpips_model, args.run_dir, initial_step, args.seed
         )
+        if continuation:
+            parent_metrics = json.loads((Path(continuation['parent_run'])/'latest_metrics.json').read_text())
+            if abs(baseline['means']['psnr']-parent_metrics['val_psnr']) > 1e-4 or abs(baseline['means']['ssim']-parent_metrics['val_ssim']) > 1e-5:
+                raise RuntimeError('Loaded continuation does not reproduce parent latest validation')
         updated = maybe_save_best(
-            args.run_dir, baseline, 0, backend, args.initial
+            args.run_dir, baseline, initial_step, backend, args.initial
         )
+        if continuation:
+            save_latest(args.run_dir, baseline, initial_step, start_epoch-1, backend)
         event = {
-            "kind": "m4_frozen_init",
-            "step": 0,
+            "kind": "continuation_init" if continuation else "m4_frozen_init",
+            "step": initial_step,
             "means": baseline["means"],
             "best_updated": updated,
         }
         append_jsonl(args.run_dir / "metrics.jsonl", event)
         print(json.dumps(event), flush=True)
         shutil.rmtree(
-            args.run_dir / "validation" / "step_000000", ignore_errors=True
+            args.run_dir / "validation" / f"step_{initial_step:06d}", ignore_errors=True
         )
     dist.barrier()
 
     optimizer.zero_grad(set_to_none=True)
     started = time.monotonic()
-    global_step = 0
+    global_step = initial_step
     last_validation = None
     stop = False
     early_stopped = False
-    epochs_without_improvement = 0
-    for epoch in range(args.epochs):
+    epochs_without_improvement = continuation['epochs_without_improvement'] if continuation else 0
+    for epoch in range(start_epoch, args.epochs):
         if stop:
             break
         sampler.set_epoch(epoch)
@@ -866,7 +898,7 @@ def main() -> None:
             )
             if not torch.isfinite(grad_norm) or float(grad_norm) <= 0:
                 raise RuntimeError(f"Invalid SMA reader gradient norm: {grad_norm}")
-            before_update = sma.readers["39"].up.weight.detach().clone() if global_step == 0 else None
+            before_update = sma.readers["39"].up.weight.detach().clone() if global_step == initial_step else None
             optimizer.step()
             if before_update is not None and torch.equal(before_update, sma.readers["39"].up.weight):
                 raise RuntimeError("First SMA reader output projection failed to update")
@@ -1056,6 +1088,10 @@ def main() -> None:
             "epochs_requested": args.epochs,
             "epochs_completed": epoch + 1,
             "optimizer_updates": global_step,
+            "optimizer_updates_this_run": global_step-initial_step,
+            "epochs_completed_before_start": start_epoch,
+            "epochs_completed_this_run": epoch+1-start_epoch,
+            "continuation": continuation,
             "early_stopped": early_stopped,
             "early_stopping_patience_epochs": args.early_stopping_patience,
             "epochs_without_improvement": epochs_without_improvement,
