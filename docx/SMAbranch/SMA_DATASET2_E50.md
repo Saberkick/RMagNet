@@ -1,7 +1,7 @@
 # SMA data_set2 / 50 epoch
 
 ## 当前状态
-错配实验 runs 已清理，记录保存在 `results_archive/SMA_gtnoise5/`。新数据已上传且 SHA-256 一致。**等待用户确认新数据 I/GT 映射及合并/独立方案，未生成缓存或启动训练。**
+错配实验 runs 已清理，记录保存在 `results_archive/SMA_gtnoise5/`。新数据已上传且 SHA-256 一致。用户已明确确认新数据 `_GT.jpg` 为GT、无后缀JPEG为输入，并选择与旧数据合并。256组数据已完成校验和划分；144个旧训练缓存按哈希硬链接复用，剩余60个待提取。
 
 ## 数据审计
 - 本地源：`D:/Develop/PhotoManager/data_set2`，308 文件 / 77 组 / 46 拍摄编号，约 38 MB。
@@ -43,4 +43,4 @@ RGB Lanczos、DoLP BOX；不裁剪、不补边、不放大；约 512×384 像素
 - 启动前GPU检查及至少16GiB磁盘余量检查。
 
 ## 已完成的检查
-Python语法编译、bash -n、确定性分组划分、四卡整epoch覆盖条件、新旧编号不重叠、上传哈希一致。尚未执行GPU训练验证；用户确认数据定义后再完成准备与启动检查。
+Python语法编译、bash -n、确定性分组划分、四卡整epoch覆盖条件、新旧编号不重叠、上传哈希一致。已核验全部新样本标签映射、旧划分保持、四图哈希、尺寸/模式和50个epoch的逐样本恰好一次采样；审计见 `materials/SMA_DATASET2_DATA_AUDIT.json`。GPU缓存与正式训练启动状态见后续launch记录。

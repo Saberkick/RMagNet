@@ -1,0 +1,16 @@
+{
+  "counts": {
+    "train": 204,
+    "validation": 26,
+    "test": 26
+  },
+  "old_splits_unchanged": true,
+  "label_mapping_all_new_images_verified": true,
+  "all_50_epoch_samplers_exact_once": true,
+  "dataset_manifest_sha256": "8aa57d9aa5536aab2a03dd7525a5006878a3e7f7c24c4ccb977c2ea6a4b4b1ad",
+  "new_by_split": {
+    "test": 9,
+    "train": 60,
+    "validation": 8
+  }
+}
