@@ -13,6 +13,7 @@
     1,
     3
   ],
-  "evaluation_status": "running",
-  "retrained": false
+  "evaluation_status": "complete",
+  "retrained": false,
+  "normal_reload_hash_matches": 26
 }
