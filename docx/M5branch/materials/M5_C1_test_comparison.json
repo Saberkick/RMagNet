@@ -1,0 +1,62 @@
+{
+  "dataset": "corrected merged sealed test26; retrospective evaluation",
+  "means": {
+    "C1-best": {
+      "l1": 0.06090553577702779,
+      "psnr": 24.19251320912288,
+      "ssim": 0.7983054128976969,
+      "edge_l1": 0.013971513996903714,
+      "low_change_keep_l1": 0.028231684655810777,
+      "high_change_restore_l1": 0.10959819038040362
+    },
+    "C1+M5-best": {
+      "l1": 0.060942300129681826,
+      "psnr": 24.224409470191368,
+      "ssim": 0.7985349205824045,
+      "edge_l1": 0.014002639943590531,
+      "low_change_keep_l1": 0.028056696218510088,
+      "high_change_restore_l1": 0.11008967011450575
+    },
+    "C1+M5-latest": {
+      "l1": 0.06115736672654748,
+      "psnr": 24.17709024135883,
+      "ssim": 0.7993233077801191,
+      "edge_l1": 0.014029251966768732,
+      "low_change_keep_l1": 0.028396141786987964,
+      "high_change_restore_l1": 0.11021200155552763
+    },
+    "M4-best(reference)": {
+      "l1": 0.06042997664413773,
+      "psnr": 24.235512476701004,
+      "ssim": 0.7996572313400415,
+      "lpips_squeeze": 0.15925581180132353,
+      "low_change_keep_l1": 0.027577896405441258,
+      "high_change_restore_l1": 0.10990086749482614
+    }
+  },
+  "m5_best_minus_c1": {
+    "l1": 3.6764352654032606e-05,
+    "psnr": 0.031896261068489196,
+    "ssim": 0.0002295076847076416,
+    "edge_l1": 3.112594668681738e-05,
+    "low_change_keep_l1": -0.00017498843730068964,
+    "high_change_restore_l1": 0.0004914797341021293
+  },
+  "m5_latest_minus_c1": {
+    "l1": 0.0002518309495196866,
+    "psnr": -0.015422967764049389,
+    "ssim": 0.00101789488242221,
+    "edge_l1": 5.773796986501857e-05,
+    "low_change_keep_l1": 0.00016445713117718697,
+    "high_change_restore_l1": 0.0006138111751240044
+  },
+  "psnr_wins": {
+    "best": 11,
+    "latest": 8
+  },
+  "best_epoch": 3,
+  "latest_epoch": 7,
+  "upstream": "Both M5 checkpoints use the same fixed C1-best; not C1-latest",
+  "metric_domain": "saved RGB8 PNG, macro per image; existing aspect-preserved processed sizes",
+  "history_note": "Previously used research test split with historical initialization scene overlaps; not blind generalization"
+}

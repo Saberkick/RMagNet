@@ -1,6 +1,6 @@
 # M5-R：固定 C1-best 后的像素细节恢复
 
-2026-10-09；分支 `experiment/m5-c1-pixel`。已实现、通过短流程检查、已后台启动首轮训练；尚未完成效果评估。本页是当前实施说明，其他 M5 文档是历史设计。
+2026-10-09；分支 `experiment/m5-c1-pixel`。已实现、通过短流程检查、训练完成并完成26张封存测试集评估；结果见 [M5_C1_RESULTS.md](M5_C1_RESULTS.md)。本页是当前实施说明，其他 M5 文档是历史设计。
 
 ## 1. 这次实际训练什么
 
@@ -109,7 +109,7 @@ SSIM 沿用工程历史口径：11×11 均匀窗口、stride1、zero padding5，
 
 额外保留 epoch0 的零修正基线作为 best 候选。如果训练始终不改善，best_epoch=0 会如实记录，不能把无变化输出称为训练成功提升。latest 为实际最近 epoch。固定覆盖 best/latest 验证 PNG，不积累每 epoch 权重或输出；权重每份约0.4 MB。
 
-输出：`runs/m5_c1_pixel_e30/`，包含 config.json、preflight.json、train.jsonl、epochs.jsonl、baseline_validation、best/latest 验证、best/latest_metrics.json，结束后写 training_summary.json/md。训练过程中日志展示未完成状态，尚无最终报告。
+输出：`runs/m5_c1_pixel_e30/`，包含 config.json、preflight.json、train.jsonl、epochs.jsonl、baseline_validation、best/latest 验证、best/latest_metrics.json，结束后写 training_summary.json/md。训练结束后已有 training_summary.json/md；最终为7epoch、357次更新，best第3epoch，详见结果文档。
 
 启动记录：`runs/m5_launch/train.pid`、`train.log`、`train.exit_code`（结束后生成）。使用 nohup，退出 SSH 不影响训练。不要在同名非空输出目录重复启动；新实验改 RUN_NAME。
 
