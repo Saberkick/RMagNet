@@ -1,0 +1,8 @@
+{
+  "smoke_step": 1,
+  "reload_metrics_identical": true,
+  "reload_png_hashes_identical": true,
+  "initial_pngs_equal_fixed_m4": true,
+  "prediction_count": 26,
+  "peak_cuda_gib": 21.39959574699402
+}

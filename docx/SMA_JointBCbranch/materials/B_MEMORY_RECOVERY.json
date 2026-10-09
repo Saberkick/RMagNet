@@ -1,0 +1,9 @@
+{
+  "source": "/share/linmingheng-local/xuke/RMagNet/runs/sma_dataset2_e50/best_sma.safetensors",
+  "source_sha256": "6bac95853a1a06e33e8b50894ff11cd2adff27db40d36847609e45a57a8ac37b",
+  "original_report": "/share/linmingheng-local/xuke/RMagNet/runs/sma_dataset2_memory_pretrain/report.json",
+  "recovered_sha256": "590abd19b8fe4830384569a57a9f66e22a49b57ef924a99d6d909869837653c0",
+  "byte_identical_to_deleted_original": false,
+  "memory_best_latest_tensor_equal": true,
+  "readers_fresh": true
+}
