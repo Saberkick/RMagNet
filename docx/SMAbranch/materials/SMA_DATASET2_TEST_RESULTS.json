@@ -1,0 +1,173 @@
+{
+  "dataset_manifest_sha256": "8aa57d9aa5536aab2a03dd7525a5006878a3e7f7c24c4ccb977c2ea6a4b4b1ad",
+  "metric_domain": "saved 8-bit RGB PNG at each sample's aspect-preserved M2 size",
+  "vae_posterior": "deterministic mode for all models",
+  "parts": {
+    "all26": {
+      "models": {
+        "m4best": {
+          "l1": 0.06042997664413773,
+          "psnr": 24.235512476701004,
+          "ssim": 0.7996572313400415,
+          "lpips_squeeze": 0.15925581180132353,
+          "low_change_keep_l1": 0.027577896405441258,
+          "high_change_restore_l1": 0.10990086749482614
+        },
+        "best": {
+          "l1": 0.06105285141473779,
+          "psnr": 24.252905442164494,
+          "ssim": 0.7991262318996283,
+          "lpips_squeeze": 0.16057255004460996,
+          "low_change_keep_l1": 0.02688480795432742,
+          "high_change_restore_l1": 0.11118069613495699
+        },
+        "latest": {
+          "l1": 0.05533692237133017,
+          "psnr": 23.846146766956036,
+          "ssim": 0.801127593104656,
+          "lpips_squeeze": 0.17228706510594258,
+          "low_change_keep_l1": 0.03403315488965465,
+          "high_change_restore_l1": 0.09010179706204396
+        }
+      },
+      "deltas_vs_m4": {
+        "best": {
+          "l1": 0.0006228747706000584,
+          "psnr": 0.017392965463489674,
+          "ssim": -0.0005309994404132379,
+          "lpips_squeeze": 0.0013167382432864305,
+          "low_change_keep_l1": -0.0006930884511138387,
+          "high_change_restore_l1": 0.0012798286401308478
+        },
+        "latest": {
+          "l1": -0.005093054272807561,
+          "psnr": -0.3893657097449683,
+          "ssim": 0.0014703617646144584,
+          "lpips_squeeze": 0.013031253304619045,
+          "low_change_keep_l1": 0.0064552584842133935,
+          "high_change_restore_l1": -0.019799070432782173
+        }
+      }
+    },
+    "original17": {
+      "models": {
+        "m4best": {
+          "l1": 0.04678645812194137,
+          "psnr": 24.157459146836224,
+          "ssim": 0.8393327243187848,
+          "lpips_squeeze": 0.1113200249040828,
+          "low_change_keep_l1": 0.024242924937211415,
+          "high_change_restore_l1": 0.08938031950417687
+        },
+        "best": {
+          "l1": 0.04638220660169335,
+          "psnr": 24.256716223324048,
+          "ssim": 0.8410110929433037,
+          "lpips_squeeze": 0.11109593247666079,
+          "low_change_keep_l1": 0.023325232241083595,
+          "high_change_restore_l1": 0.08944355225300088
+        },
+        "latest": {
+          "l1": 0.04980151809971122,
+          "psnr": 23.527927847469556,
+          "ssim": 0.8324276173816008,
+          "lpips_squeeze": 0.11890651439042653,
+          "low_change_keep_l1": 0.031431878040380334,
+          "high_change_restore_l1": 0.08451638151617612
+        }
+      },
+      "deltas_vs_m4": {
+        "best": {
+          "l1": -0.0004042515202480196,
+          "psnr": 0.09925707648782378,
+          "ssim": 0.0016783686245188667,
+          "lpips_squeeze": -0.00022409242742200963,
+          "low_change_keep_l1": -0.0009176926961278198,
+          "high_change_restore_l1": 6.323274882401309e-05
+        },
+        "latest": {
+          "l1": 0.0030150599777698517,
+          "psnr": -0.6295312993666684,
+          "ssim": -0.006905106937184047,
+          "lpips_squeeze": 0.007586489486343731,
+          "low_change_keep_l1": 0.007188953103168919,
+          "high_change_restore_l1": -0.004863937988000749
+        }
+      }
+    },
+    "new9": {
+      "models": {
+        "m4best": {
+          "l1": 0.08620106718606418,
+          "psnr": 24.382946544223362,
+          "ssim": 0.7247146334913042,
+          "lpips_squeeze": 0.2498011870516671,
+          "low_change_keep_l1": 0.03387728695654207,
+          "high_change_restore_l1": 0.14866190258827475
+        },
+        "best": {
+          "l1": 0.08876406939493285,
+          "psnr": 24.245707299974228,
+          "ssim": 0.7200103832615746,
+          "lpips_squeeze": 0.25402838322851395,
+          "low_change_keep_l1": 0.03360845096823242,
+          "high_change_restore_l1": 0.15223974568976295
+        },
+        "latest": {
+          "l1": 0.0657926859954993,
+          "psnr": 24.44722694820828,
+          "ssim": 0.7420053250259824,
+          "lpips_squeeze": 0.2731169942352507,
+          "low_change_keep_l1": 0.03894667782717281,
+          "high_change_restore_l1": 0.10065202642646101
+        }
+      },
+      "deltas_vs_m4": {
+        "best": {
+          "l1": 0.002563002208868667,
+          "psnr": -0.13723924424913392,
+          "ssim": -0.004704250229729534,
+          "lpips_squeeze": 0.004227196176846859,
+          "low_change_keep_l1": -0.00026883598830964445,
+          "high_change_restore_l1": 0.003577843101488204
+        },
+        "latest": {
+          "l1": -0.020408381190564887,
+          "psnr": 0.06428040398491675,
+          "ssim": 0.017290691534678215,
+          "lpips_squeeze": 0.023315807183583614,
+          "low_change_keep_l1": 0.005069390870630741,
+          "high_change_restore_l1": -0.048009876161813736
+        }
+      }
+    }
+  },
+  "checkpoints": {
+    "m4best": {
+      "path": "/share/linmingheng-local/xuke/RMagNet/runs/m4_best_newcache_e20_p4/best_transmission_lora.safetensors",
+      "sha256": "897282b1bb9cfe61f96530df72edcf8a44a066bb819a3663e9100862aefdb2a3",
+      "epoch": null,
+      "step": null
+    },
+    "best": {
+      "path": "/share/linmingheng-local/xuke/RMagNet/runs/sma_dataset2_e50/best_sma.safetensors",
+      "sha256": "6bac95853a1a06e33e8b50894ff11cd2adff27db40d36847609e45a57a8ac37b",
+      "epoch": 2,
+      "step": 102
+    },
+    "latest": {
+      "path": "/share/linmingheng-local/xuke/RMagNet/runs/sma_dataset2_e50/latest_sma.safetensors",
+      "sha256": "3e7da6d841ad3bef9c4899713401773ac91648b6c3fb5c37d2d2250516a745e4",
+      "epoch": 50,
+      "step": 2550
+    }
+  },
+  "old17_m4_reproduction_deltas": {
+    "l1": 0.0,
+    "psnr": 0.0,
+    "ssim": 0.0,
+    "lpips_squeeze": 0.0,
+    "low_change_keep_l1": 0.0,
+    "high_change_restore_l1": 0.0
+  }
+}
