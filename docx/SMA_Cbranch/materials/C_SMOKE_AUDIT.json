@@ -1,0 +1,27 @@
+{
+  "status": "pass",
+  "reload_png_hashes_match": 26,
+  "zero_init_m4_png_match": 26,
+  "current_smoke_condition_output_l1": 0.0,
+  "temporary_sensitivity_raw_gamma": 0.2,
+  "temporary_sensitivity_calibration": {
+    "calibration": true,
+    "reliability_loss": 0.6931471824645996,
+    "reliability_tau": 0.09482543170452118,
+    "reliability_coefficient": 2.8423572547375117e-05,
+    "reliability_gate_gradient_ratio": 0.09999968761799151,
+    "gate_mean": 0.5000001192092896,
+    "condition_beneficial_token_fraction": 0.5213903784751892,
+    "condition_output_l1": 0.0016021728515625,
+    "counterfactual_memory_identical": true
+  },
+  "validation": {
+    "l1": 0.04368958786989634,
+    "psnr": 24.023508218618538,
+    "ssim": 0.8684323728084564,
+    "lpips_squeeze": 0.11864255984815267,
+    "low_change_keep_l1": 0.029064422043470237,
+    "high_change_restore_l1": 0.07108800263645557
+  },
+  "note": "Sensitivity gamma is temporary, no optimizer update, not included in formal initialization/checkpoint"
+}

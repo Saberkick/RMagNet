@@ -1,0 +1,11 @@
+{
+  "retained": [
+    "runs/sma_dataset2_e50/best_sma.safetensors",
+    "runs/sma_joint_b_e4/*",
+    "runs/sma_joint_b_init/*",
+    "data_cache/sma_dataset2_v1/*"
+  ],
+  "archived_records": "results_archive/SMA_before_C_cleanup",
+  "duplicate_prediction_pngs_removed_mib": 117.83123016357422,
+  "no_shared_model_or_training_dataset_removed": true
+}

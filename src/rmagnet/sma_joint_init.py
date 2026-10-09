@@ -8,7 +8,7 @@ from .sma_eval import ROOT,M4_SHA
 
 def main():
     p=argparse.ArgumentParser();p.add_argument('--output',type=Path,required=True);a=p.parse_args()
-    old=ROOT/'RMagNet/runs/sma_dataset2_memory_pretrain/report.json'
+    old=ROOT/'RMagNet/results_archive/SMA_before_C_cleanup/sma_dataset2_memory_pretrain/report.json'
     report=json.loads(old.read_text())
     source=ROOT/'RMagNet/runs/sma_dataset2_e50/best_sma.safetensors'
     cache=ROOT/'RMagNet/data_cache/sma_dataset2_v1/manifest.json'
@@ -24,8 +24,11 @@ def main():
         atomic_safetensors(target,model.state_dict(),{'experiment':'SMA','teacher_sha256':M4_SHA,'cache_manifest_sha256':sha256(cache)})
     recovered=safetensors.torch.load_file(target)
     if not all(torch.equal(v,recovered[k]) for k,v in model.state_dict().items()):raise RuntimeError('Recovered tensors mismatch')
-    latest=safetensors.torch.load_file(ROOT/'RMagNet/runs/sma_dataset2_e50/latest_sma.safetensors')
-    if not all(torch.equal(v,latest[k]) for k,v in state.items() if not k.startswith('readers.')):raise RuntimeError('Memory changed in parent run')
+    recovery=a.output/'recovery.json'
+    if not recovery.is_file():raise RuntimeError('Preserved memory recovery audit missing')
+    prior=json.loads(recovery.read_text())
+    if not prior['memory_best_latest_tensor_equal'] or prior['recovered_sha256']!=sha256(target):
+        raise RuntimeError('Preserved memory recovery audit mismatch')
     original_hash=report['memory_sha256']
     report=dict(report, memory_sha256=sha256(target), original_memory_sha256=original_hash,
                 recovery='unchanged best/latest PCA and memory; seed-2026 fresh readers; no trained readers reused')

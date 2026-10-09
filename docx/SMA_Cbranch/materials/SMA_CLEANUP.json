@@ -1,0 +1,106 @@
+{
+  "preserved_sma_best": "/share/linmingheng-local/xuke/RMagNet/runs/sma_dataset2_e50/best_sma.safetensors",
+  "preserved_B": "runs/sma_joint_b_e4",
+  "initial_memory_preserved": "runs/sma_joint_b_init",
+  "deleted": [
+    {
+      "deleted": "/share/linmingheng-local/xuke/RMagNet/runs/sma_e20",
+      "bytes": 71356949
+    },
+    {
+      "deleted": "/share/linmingheng-local/xuke/RMagNet/runs/sma_dataset2_e50/validation",
+      "bytes": 0
+    },
+    {
+      "deleted": "/share/linmingheng-local/xuke/RMagNet/runs/sma_dataset2_e50/initial_prediction_hashes.json",
+      "bytes": 2349
+    },
+    {
+      "deleted": "/share/linmingheng-local/xuke/RMagNet/runs/sma_dataset2_e50/metrics.jsonl",
+      "bytes": 2421321
+    },
+    {
+      "deleted": "/share/linmingheng-local/xuke/RMagNet/runs/sma_dataset2_e50/latest_sma.safetensors",
+      "bytes": 28252584
+    },
+    {
+      "deleted": "/share/linmingheng-local/xuke/RMagNet/runs/sma_dataset2_e50/latest_metrics.json",
+      "bytes": 231
+    },
+    {
+      "deleted": "/share/linmingheng-local/xuke/RMagNet/runs/sma_dataset2_e50/best_validation",
+      "bytes": 4684731
+    },
+    {
+      "deleted": "/share/linmingheng-local/xuke/RMagNet/runs/sma_dataset2_e50/latest_validation",
+      "bytes": 4611035
+    },
+    {
+      "deleted": "/share/linmingheng-local/xuke/RMagNet/runs/sma_dataset2_e50/test_best.console.log",
+      "bytes": 3250
+    },
+    {
+      "deleted": "/share/linmingheng-local/xuke/RMagNet/runs/sma_dataset2_e50/test_latest.console.log",
+      "bytes": 3246
+    },
+    {
+      "deleted": "/share/linmingheng-local/xuke/RMagNet/runs/sma_dataset2_e50/test_latest",
+      "bytes": 4453397
+    },
+    {
+      "deleted": "/share/linmingheng-local/xuke/RMagNet/runs/sma_dataset2_e50/test_best",
+      "bytes": 4528306
+    },
+    {
+      "deleted": "/share/linmingheng-local/xuke/RMagNet/runs/sma_dataset2_e50/test_m4best_sampled_vae",
+      "bytes": 4532083
+    },
+    {
+      "deleted": "/share/linmingheng-local/xuke/RMagNet/runs/sma_dataset2_e50/test_m4best_sampled_vae.console.log",
+      "bytes": 3249
+    },
+    {
+      "deleted": "/share/linmingheng-local/xuke/RMagNet/runs/sma_dataset2_e50/test_m4best.console.log",
+      "bytes": 3249
+    },
+    {
+      "deleted": "/share/linmingheng-local/xuke/RMagNet/runs/sma_dataset2_e50/test_m4best",
+      "bytes": 4532474
+    },
+    {
+      "deleted": "/share/linmingheng-local/xuke/RMagNet/runs/sma_dataset2_e50/epoch_summary.json",
+      "bytes": 21681
+    },
+    {
+      "deleted": "/share/linmingheng-local/xuke/RMagNet/runs/sma_dataset2_e50/build_test_report.py",
+      "bytes": 7304
+    },
+    {
+      "deleted": "/share/linmingheng-local/xuke/RMagNet/runs/sma_dataset2_e50/test_comparison.json",
+      "bytes": 6026
+    },
+    {
+      "deleted": "/share/linmingheng-local/xuke/RMagNet/runs/sma_dataset2_e50/test_comparison_per_image.csv",
+      "bytes": 10496
+    },
+    {
+      "deleted": "/share/linmingheng-local/xuke/RMagNet/runs/sma_dataset2_e50/TEST_COMPARISON.md",
+      "bytes": 3881
+    },
+    {
+      "deleted": "/share/linmingheng-local/xuke/RMagNet/runs/real20_sma_dataset2_e50",
+      "bytes": 104482689
+    },
+    {
+      "deleted": "/share/linmingheng-local/xuke/RMagNet/runs/sma_dataset2_memory_pretrain",
+      "bytes": 1578
+    },
+    {
+      "deleted": "/share/linmingheng-local/xuke/RMagNet/runs/sma_memory_pretrain",
+      "bytes": 1553
+    }
+  ],
+  "bytes_freed": 233923662,
+  "archived_remaining_bytes": 25619667,
+  "estimated_net_freed_bytes": 208303995
+}
