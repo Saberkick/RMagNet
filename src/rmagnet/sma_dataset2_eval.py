@@ -26,10 +26,12 @@ def main():
     p.add_argument('--condition-mode',choices=['learned','off','on'],default='learned')
     p.add_argument('--data-root',type=Path,default=ROOT/'datasets/rmagnet_sma_dataset2')
     p.add_argument('--initial',type=Path,default=ROOT/'RMagNet/runs/m4_best_newcache_e20_p4/best_transmission_lora.safetensors')
+    p.add_argument('--initial-sha256',default=M4_SHA)
     a=p.parse_args()
     if a.condition_mode!='learned' and not a.checkpoint:raise ValueError('Condition mode requires C checkpoint')
     if a.output.exists() and any(a.output.iterdir()):raise FileExistsError(a.output)
-    if sha256(a.initial)!=M4_SHA:raise RuntimeError('Fixed M4 identity mismatch')
+    initial_sha = sha256(a.initial)
+    if initial_sha!=a.initial_sha256:raise RuntimeError('Fixed initialization identity mismatch')
     manifest,records,splits=load_manifest(a.data_root)
     device=torch.device('cuda:0');torch.cuda.set_device(device)
     torch.manual_seed(2026);torch.cuda.manual_seed(2026)
@@ -40,12 +42,12 @@ def main():
         checkpoint=a.checkpoint
         with safe_open(checkpoint,framework='pt') as h:
             md=h.metadata()
-            if md.get('architecture') not in (SMA_VERSION,JOINT_VERSION,C_VERSION) or md.get('base_m4_sha256')!=M4_SHA:
+            if md.get('architecture') not in (SMA_VERSION,JOINT_VERSION,C_VERSION) or md.get('base_initial_sha256', md.get('base_m4_sha256'))!=initial_sha:
                 raise RuntimeError('SMA architecture/base identity mismatch')
         is_c=md['architecture']==C_VERSION
         sma=(ConditionedSMA() if is_c else SMA()).to(device)
-        if is_c:load_c(checkpoint,backend,sma,device,M4_SHA)
-        elif md['architecture']==JOINT_VERSION:load_joint(checkpoint,backend,sma,device,M4_SHA)
+        if is_c:load_c(checkpoint,backend,sma,device,initial_sha)
+        elif md['architecture']==JOINT_VERSION:load_joint(checkpoint,backend,sma,device,initial_sha)
         else:sma.load_state_dict(safetensors.torch.load_file(checkpoint,device=str(device)),strict=True)
         sma.requires_grad_(False);sma.eval();runtime=(install_c if is_c else install)(backend,sma)
         if is_c:runtime.default_mode=a.condition_mode
@@ -71,6 +73,11 @@ def main():
         parts[source]={'count':len(selected),'means':macro(selected,keys),'ids':[r['id'] for r in selected]}
     report.update({'model':('C1' if a.checkpoint and md['architecture']==C_VERSION else 'SMA-B-joint' if a.checkpoint and md['architecture']==JOINT_VERSION else 'SMA') if a.checkpoint else 'M4-best','split':a.split,'sample_count':len(rows),'checkpoint':str(checkpoint),'checkpoint_sha256':sha256(checkpoint),'m4_sha256':M4_SHA,'dataset_manifest_sha256':sha256(a.data_root/'manifest.json'),'dataset_root':str(a.data_root),'by_source':parts,'inference_inputs':'ordinary I only; GT exclusively for metrics; no P90/DoLP/cache at inference'})
     report['condition_mode']=a.condition_mode
+    report['initial_sha256']=initial_sha
+    report['initial_adapter']=str(a.initial)
+    if initial_sha != M4_SHA:
+        report.pop('m4_sha256', None)
+        if not a.checkpoint: report['model']='WindowSeat official'
     report['vae_posterior']='deterministic mode, same for SMA and M4'
     if a.checkpoint:
         config=json.loads((checkpoint.parent/'run_config.json').read_text())

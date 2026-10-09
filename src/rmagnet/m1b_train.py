@@ -111,10 +111,24 @@ class DinoPatchLoss:
 def load_initial(backend: QwenSharedBackend, path: Path, device: torch.device) -> None:
     if not path.is_file():
         raise FileNotFoundError(path)
-    weights = safetensors.torch.load_file(path, device=str(device))
+    # Stage from CPU to avoid a second full FP32 adapter allocation on a 24GB GPU.
+    weights = safetensors.torch.load_file(path, device='cpu')
     expected = {name for name, p in backend.transformer.named_parameters() if p.requires_grad}
     if set(weights) != expected:
-        raise RuntimeError(f"Adapter keys differ: missing={len(expected-set(weights))}, extra={len(set(weights)-expected)}")
+        from .qwen_backend import check_snapshots
+        _, folder = check_snapshots()
+        official = folder / 'transformer_lora/pytorch_lora_weights.safetensors'
+        missing = expected - set(weights)
+        permitted = {'proj_out.lora_A.default.weight', 'proj_out.lora_B.default.weight'}
+        if path.resolve() != official.resolve() or missing != permitted or set(weights) - expected:
+            raise RuntimeError(f"Adapter keys differ: missing={len(missing)}, extra={len(set(weights)-expected)}")
+        params = dict(backend.transformer.named_parameters())
+        if torch.count_nonzero(params['proj_out.lora_B.default.weight']).item() != 0:
+            raise RuntimeError('Official missing proj_out adapter must be a zero residual')
+        # The upstream constructs these two tensors, but its published checkpoint
+        # omits them. Keeping the freshly constructed zero-B adapter preserves
+        # official inference exactly; all subsequent trained saves are complete.
+        print('Official WindowSeat: retain native zero-residual proj_out LoRA', flush=True)
     _, unexpected = backend.transformer.load_state_dict(weights, strict=False)
     if unexpected:
         raise RuntimeError(f"Unexpected adapter keys: {unexpected[:5]}")

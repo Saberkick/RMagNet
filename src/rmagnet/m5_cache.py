@@ -10,14 +10,30 @@ DATA=ROOT/'datasets/rmagnet_sma_dataset2'
 C1=PROJECT/'runs/sma_c1_e10/best_sma.safetensors'
 CACHE=PROJECT/'data_cache/m5_c1_rgb8_v1'
 
+def resolve_initial(checkpoint, initial=None):
+    from safetensors import safe_open
+    with safe_open(checkpoint, framework='pt') as handle:
+        metadata = handle.metadata()
+    expected = metadata.get('base_initial_sha256', metadata.get('base_m4_sha256'))
+    if initial is None:
+        config_path = checkpoint.parent / 'run_config.json'
+        if not config_path.is_file():
+            raise RuntimeError('Provide --initial when the C1 run config is unavailable')
+        initial = Path(json.loads(config_path.read_text())['args']['initial'])
+    if sha256(initial) != expected:
+        raise RuntimeError('C1 initialization-adapter provenance mismatch')
+    return initial, expected
+
 def main():
     p=argparse.ArgumentParser();p.add_argument('--cache',type=Path,default=CACHE)
     p.add_argument('--data',type=Path,default=DATA);p.add_argument('--checkpoint',type=Path,default=C1)
+    p.add_argument('--initial',type=Path)
     a=p.parse_args();_,records,splits=load_manifest(a.data)
+    initial, initial_sha = resolve_initial(a.checkpoint, a.initial)
     identity={'version':'m5-c1-rgb8-v1','checkpoint':str(a.checkpoint),'checkpoint_sha256':sha256(a.checkpoint),
               'data_root':str(a.data),'dataset_manifest_sha256':sha256(a.data/'manifest.json'),
               'vae_posterior':'mode','condition_mode':'learned','quantization':'clamp(0,1)*255, torch.round, RGB uint8 PNG',
-              'upstream_inputs':'ordinary I only','code_commit':subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip()}
+              'upstream_inputs':'ordinary I only','initial_adapter':str(initial),'initial_sha256':initial_sha,'code_commit':subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip()}
     a.cache.mkdir(parents=True,exist_ok=True);(a.cache/'predictions').mkdir(exist_ok=True)
     index=a.cache/'manifest.json';previous=json.loads(index.read_text()) if index.exists() else None
     if previous:
@@ -49,14 +65,11 @@ def main():
                 if backend is None:
                     from .qwen_backend import QwenSharedBackend
                     from .m1b_train import load_initial
-                    from .sma_eval import M4_SHA
                     from .sma_conditioned import ConditionedSMA,load_joint,install
                     torch.cuda.set_device(0);torch.manual_seed(2026);torch.cuda.manual_seed_all(2026)
                     device=torch.device('cuda:0');backend=QwenSharedBackend.from_local(device)
-                    initial=PROJECT/'runs/m4_best_newcache_e20_p4/best_transmission_lora.safetensors'
-                    if sha256(initial)!=M4_SHA:raise RuntimeError('M4 source changed')
                     backend.set_trainable_branch('transmission');load_initial(backend,initial,device);backend.set_trainable_branch(None)
-                    sma=ConditionedSMA().to(device);load_joint(a.checkpoint,backend,sma,device,M4_SHA)
+                    sma=ConditionedSMA().to(device);load_joint(a.checkpoint,backend,sma,device,initial_sha)
                     sma.requires_grad_(False).eval();runtime=install(backend,sma);runtime.default_mode='learned'
                     backend.transformer.eval();backend.vae.eval()
                     if any(v.requires_grad for v in backend.transformer.parameters()) or any(v.requires_grad for v in backend.vae.parameters()):raise RuntimeError('Upstream is not frozen')

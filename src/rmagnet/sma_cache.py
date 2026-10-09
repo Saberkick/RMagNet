@@ -226,7 +226,7 @@ def finalize(args: argparse.Namespace) -> None:
         "created_at_utc": datetime.now(timezone.utc).isoformat(),
         "project_git_commit": subprocess.check_output(["git", "-C", str(PROJECT), "rev-parse", "HEAD"], text=True).strip(),
         "source_dataset": {"version": dataset_manifest["version"], "manifest": str(data_root / "manifest.json"), "manifest_sha256": sha256(data_root / "manifest.json"), "split": "train", "sample_count": len(train_ids), "train_ids": train_ids},
-        "teacher": {"model": "Qwen/Qwen-Image-Edit-2509", "adapter": str(adapter), "adapter_sha256": adapter_sha, "adapter_mode": "M4 best Transmission LoRA enabled; all parameters frozen", "vae": "posterior mode; deterministic", "flow_timestep": FLOW_TIMESTEP, "early_blocks": list(EARLY_BLOCKS), "mid_blocks": list(MID_BLOCKS), "late_blocks": list(LATE_BLOCKS), "hidden_size": HIDDEN_SIZE},
+        "teacher": {"model": "Qwen/Qwen-Image-Edit-2509", "adapter": str(adapter), "adapter_sha256": adapter_sha, "adapter_mode": args.adapter_description, "vae": "posterior mode; deterministic", "flow_timestep": FLOW_TIMESTEP, "early_blocks": list(EARLY_BLOCKS), "mid_blocks": list(MID_BLOCKS), "late_blocks": list(LATE_BLOCKS), "hidden_size": HIDDEN_SIZE},
         "late_gate": {"per_layer": "robust p02/p98 normalized cosine distance Q_l(I),Q_l(GT)", "ensemble": "mean(D52,D54,D56)*(0.75+0.25*agreement)", "agreement": "clip(1-2*std(D52,D54,D56),0,1)", "range": [0, 1]},
         "storage": {"total_bytes": total_bytes, "total_gib": total_bytes / 2**30, "dtype": "bfloat16 features; float16 gates"},
         "samples": records,
@@ -245,6 +245,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--data-root", type=Path, default=DEFAULT_DATA)
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
     parser.add_argument("--adapter", type=Path, default=DEFAULT_ADAPTER)
+    parser.add_argument('--adapter-description', default='M4 best Transmission LoRA enabled; all parameters frozen')
     parser.add_argument("--device", default="cuda:0")
     parser.add_argument("--shard-index", type=int, default=0)
     parser.add_argument("--num-shards", type=int, default=1)

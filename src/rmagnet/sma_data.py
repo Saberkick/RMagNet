@@ -11,14 +11,22 @@ def load_manifest(root):
                 "m2-variable-aspect-v3-excluded-misaligned": 17,
                 "sma-variable-aspect-v4-expanded-clean": None}
     version = manifest.get("version")
-    if not manifest.get("complete") or version not in versions:
+    filtered = isinstance(version, str) and version.endswith('-localfilter-20261009')
+    base_version = version.removesuffix('-localfilter-20261009') if filtered else version
+    if not manifest.get("complete") or base_version not in versions:
         raise RuntimeError("Unsupported or incomplete corrected dataset")
+    if filtered:
+        audit = manifest.get('local_filter', {})
+        if audit.get('numeric_ceiling') != 162 or not audit.get('splits_preserved') or not audit.get('keep_list_sha256'):
+            raise RuntimeError('Filtered dataset provenance is missing')
+        if {r['id'] for r in manifest['samples']} & set(audit.get('removed_ids', [])):
+            raise RuntimeError('Removed sample returned to filtered dataset')
     if manifest.get("label_correction", {}).get("status") != "applied":
         raise RuntimeError("Label correction must be recorded")
     records = {r["id"]: r for r in manifest["samples"]}
     if len(records)!=len(manifest["samples"]):raise RuntimeError("Duplicate dataset IDs")
     splits = {s: (root/"splits"/f"{s}.txt").read_text().split() for s in ("train", "validation", "test")}
-    if version == "sma-variable-aspect-v4-expanded-clean":
+    if base_version == "sma-variable-aspect-v4-expanded-clean" or filtered:
         actual = {k:len(v) for k,v in splits.items()}
         if actual != manifest['split']['sample_counts'] or min(actual.values())<1 or actual['train']%4:
             raise RuntimeError("Expanded dataset split accounting mismatch")

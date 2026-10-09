@@ -33,10 +33,10 @@ def metrics(x,gt,image):
             'ssim':float(ssim(x,gt)),'edge_l1':float(edge(x,gt)),
             'low_change_keep_l1':float(err[lo].mean()),'high_change_restore_l1':float(err[hi].mean())}
 
-def audit(data,cache):
+def audit(data,cache,upstream_checkpoint=C1):
     _,records,splits=load_manifest(data);manifest=json.loads((cache/'manifest.json').read_text())
     if not manifest['complete'] or manifest['version']!='m5-c1-rgb8-v1':raise RuntimeError('Incomplete/wrong cache')
-    if manifest['dataset_manifest_sha256']!=sha256(data/'manifest.json') or manifest['checkpoint_sha256']!=sha256(C1):raise RuntimeError('Cache source changed')
+    if manifest['dataset_manifest_sha256']!=sha256(data/'manifest.json') or manifest['checkpoint_sha256']!=sha256(upstream_checkpoint):raise RuntimeError('Cache source changed')
     if set(manifest['samples'])!=set(records):raise RuntimeError('Cache ID mismatch')
     for sid,r in records.items():
         c=manifest['samples'][sid];p=cache/'predictions'/f'{sid}.png'
@@ -113,10 +113,11 @@ def main():
     p.add_argument('--output',type=Path,required=True);p.add_argument('--epochs',type=int,default=30);p.add_argument('--patience',type=int,default=4)
     p.add_argument('--accumulation',type=int,default=4);p.add_argument('--min-epochs',type=int,default=5);p.add_argument('--lr',type=float,default=2e-4)
     p.add_argument('--checkpoint',type=Path);p.add_argument('--split',choices=['validation','test'],default='test');p.add_argument('--probe-only',action='store_true')
+    p.add_argument('--upstream-checkpoint',type=Path,default=C1)
     a=p.parse_args()
-    if a.epochs<1 or a.accumulation<1 or a.patience<1:raise ValueError('Positive budgets required')
+    if a.epochs<1 or a.accumulation<1 or a.patience<0:raise ValueError('Positive budgets and nonnegative patience required')
     if a.output.exists() and any(a.output.iterdir()):raise FileExistsError(a.output)
-    a.output.mkdir(parents=True);records,splits,identity=audit(a.data,a.cache)
+    a.output.mkdir(parents=True);records,splits,identity=audit(a.data,a.cache,a.upstream_checkpoint)
     torch.set_num_threads(1);torch.cuda.set_device(0);device=torch.device('cuda:0');torch.manual_seed(2026);random.seed(2026)
     if a.checkpoint:
         model,md=load_model(a.checkpoint,identity,device)
@@ -129,7 +130,7 @@ def main():
     del model;torch.cuda.empty_cache();torch.manual_seed(2026);model=PixelRefiner().to(device)
     updates=math.ceil(len(splits['train'])/a.accumulation)
     config={k:str(v) if isinstance(v,Path) else v for k,v in vars(a).items()}
-    config.update(architecture=VERSION,upstream_checkpoint=str(C1),upstream_sha256=identity['checkpoint_sha256'],dataset_manifest_sha256=identity['dataset_manifest_sha256'],
+    config.update(architecture=VERSION,upstream_checkpoint=str(a.upstream_checkpoint),upstream_sha256=identity['checkpoint_sha256'],dataset_manifest_sha256=identity['dataset_manifest_sha256'],
         train_samples=len(splits['train']),validation_samples=len(splits['validation']),test_samples=len(splits['test']),updates_per_epoch=updates,
         trainable_parameters=sum(v.numel() for v in model.parameters()),precision='FP32',effective_batch=a.accumulation,backbone_frozen='offline C1, never loaded',
         selection='minimum saved-RGB8 validation macro L1; epoch0 baseline eligible',optimizer='AdamW weight_decay=1e-4',identity_weight=.05,identity_every_samples=10,
@@ -183,7 +184,7 @@ def main():
             'validation':validation['means'],'minus_c1':validation['minus_c1'],'best_epoch':best_epoch,'bad_epochs':bad,'improved':improved}
         with (a.output/'epochs.jsonl').open('a') as f:f.write(json.dumps(er)+'\n')
         print('EPOCH '+json.dumps(er),flush=True)
-        if epoch>=a.min_epochs and bad>=a.patience:break
+        if a.patience>0 and epoch>=a.min_epochs and bad>=a.patience:break
     summary={'status':'complete','completed_epochs':epoch,'steps':step,'best_epoch':best_epoch,'best_validation_l1':best,
              'elapsed_seconds':time.time()-start,'early_stopped':epoch<a.epochs,'peak_allocated_gib':torch.cuda.max_memory_allocated()/2**30,
              'best_may_be_identity_baseline':best_epoch==0,'sealed_test_evaluated':False}

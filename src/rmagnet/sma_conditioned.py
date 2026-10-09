@@ -173,7 +173,7 @@ def forward(backend, latent):
 def save_joint(path, backend, m4_sha):
     state = {'sma.'+k: v for k, v in backend.sma.state_dict().items()}
     state.update({'lora.'+canonical(k): v for k, v in backend.transformer.named_parameters() if '.lora_' in k and '.default.' in k})
-    atomic_safetensors(path, state, {'architecture': C_VERSION, 'base_m4_sha256': m4_sha, 'experiment': 'C1', 'contains': 'student LoRA and full conditioned semantic memory'})
+    atomic_safetensors(path, state, {'architecture': C_VERSION, 'base_m4_sha256': m4_sha, 'base_initial_sha256': m4_sha, 'base_family': getattr(backend, 'initialization_family', 'M4 final best'), 'experiment': 'C1', 'contains': 'student LoRA and full conditioned semantic memory'})
 
 
 def load_joint(path, backend, sma, device, m4_sha):
@@ -181,7 +181,7 @@ def load_joint(path, backend, sma, device, m4_sha):
         md = f.metadata()
     if md.get('architecture') != C_VERSION or md.get('base_m4_sha256') != m4_sha:
         raise RuntimeError('C checkpoint identity mismatch')
-    state = safetensors.torch.load_file(path, device=str(device))
+    state = safetensors.torch.load_file(path, device='cpu')
     expected = {k for k, _ in backend.transformer.named_parameters() if '.lora_' in k and '.default.' in k}
     lora = {k[5:]: v for k, v in state.items() if k.startswith('lora.')}
     if set(lora) != expected:

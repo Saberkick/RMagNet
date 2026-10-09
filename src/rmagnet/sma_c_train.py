@@ -12,6 +12,7 @@ import os
 import shutil
 import subprocess
 import time
+from contextlib import nullcontext
 from collections import Counter
 from datetime import datetime, timezone
 from pathlib import Path
@@ -469,7 +470,7 @@ def save_latest(
 
 def atomic_save_adapter(path, backend):
     if getattr(backend, "joint_training", False):
-        return save_joint(path, backend, EXPECTED_INITIAL_SHA256)
+        return save_joint(path, backend, backend.initialization_sha256)
     from .m4_cache import atomic_safetensors
     atomic_safetensors(path, backend.sma.state_dict(), {"experiment": "SMA", "architecture": SMA_VERSION, "base_m4_sha256": EXPECTED_INITIAL_SHA256})
 
@@ -525,6 +526,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--calibration-start-epoch", type=int, default=1)
     parser.add_argument("--calibration-interval", type=int, default=8)
     parser.add_argument("--preflight-only", action="store_true")
+    parser.add_argument('--initial-family', default='M4 final best')
+    parser.add_argument('--cpu-offload-activations', action='store_true', help='Offload saved autograd tensors to host RAM for 24GB training')
     return parser.parse_args()
 
 
@@ -639,6 +642,8 @@ def main() -> None:
 
     backend = QwenSharedBackend.from_local(device)
     initial_sha = check_initial_hash(args.initial, args.initial_sha256, device)
+    backend.initialization_sha256 = initial_sha
+    backend.initialization_family = args.initial_family
     # Every rank loads the fixed final M4; synchronizing only new readers would
     # otherwise leave nonzero ranks running the official WindowSeat adapter.
     backend.set_trainable_branch("transmission")
@@ -709,6 +714,7 @@ def main() -> None:
             "updates_per_epoch": updates_per_epoch,
             "planned_steps": planned_steps,
             "initial_sha256": initial_sha,
+            "initialization_family": args.initial_family,
             "cache_manifest_sha256": sha256(args.cache_root / "manifest.json"),
             "dataset_manifest_sha256": sha256(args.data_root / "manifest.json"),
             "roles": {
@@ -718,7 +724,7 @@ def main() -> None:
             },
             "base": f"mean I/P90 of L1 + {args.ssim_weight}*(1-SSIM) + {args.edge_weight}*edge; {args.consistency_coefficient} polar consistency",
             "gradient_control": preflight["auxiliary_gradient_targets"],
-            "memory_strategy": "frozen Q37 clean memory; four Q39/Q41 image FFN rank128 modulators; reliability calibrated by current-student off/on counterfactuals; fixed M4 loss teacher",
+            "memory_strategy": "frozen Q37 clean memory; four Q39/Q41 image FFN rank128 modulators; reliability calibrated by current-student off/on counterfactuals; fixed initialization-adapter loss teacher",
             "trainable_parameters": sum(p.numel() for p in parameters),
             "memory_file_sha256": sha256(initial_sma_path),
             "continuation": continuation,
@@ -761,7 +767,7 @@ def main() -> None:
         if continuation:
             save_latest(args.run_dir, baseline, initial_step, start_epoch-1, backend)
         event = {
-            "kind": "continuation_init" if continuation else "m4_frozen_init",
+            "kind": "continuation_init" if continuation else "selected_initial_baseline",
             "step": initial_step,
             "means": baseline["means"],
             "best_updated": updated,
@@ -824,7 +830,8 @@ def main() -> None:
                 leaf, target, image, gate, grid_h, grid_w
             )
             # Same fixed M4 teacher as the cache; only new modules are bypassed.
-            with teacher_context(backend, runtime):
+            offload = lambda: torch.autograd.graph.save_on_cpu(pin_memory=True) if args.cpu_offload_activations else nullcontext()
+            with offload(), teacher_context(backend, runtime):
               try:
                   features = online_prediction_features(
                       backend, leaf, expected_tokens
@@ -887,13 +894,15 @@ def main() -> None:
             del texture, semantic, semantic_content, semantic_relation
             torch.cuda.empty_cache()
 
-            prediction_i = forward_from_latent(backend, latent_i)
-            prediction_i.backward(output_gradient_i)
+            with offload():
+                prediction_i = forward_from_latent(backend, latent_i)
+                prediction_i.backward(output_gradient_i)
             prediction_i_reference = prediction_i.detach()
             del prediction_i, output_gradient_i
             torch.cuda.empty_cache()
 
-            prediction_90 = forward_from_latent(backend, latent_90)
+            with offload():
+                prediction_90 = forward_from_latent(backend, latent_90)
             rec_90, rec_90_parts = transmission_loss(
                 prediction_90, target, args.ssim_weight, args.edge_weight
             )

@@ -19,8 +19,12 @@ def install_teacher(backend):
     state={canonical(n):p.detach().cpu().clone() for n,p in backend.transformer.named_parameters() if '.lora_' in n and '.default.' in n}
     backend.fixed_m4_teacher_state=state
     backend.set_trainable_branch('transmission')
-    return {'storage':'CPU immutable M4 LoRA snapshot, staged weight switching',
-        'tensors':len(state),'parameters':sum(p.numel() for p in state.values()),'initialized_equal_to_m4':True}
+    family = getattr(backend, 'initialization_family', 'M4 final best')
+    return {'storage':'CPU immutable initialization LoRA snapshot, staged weight switching',
+        'tensors':len(state),'parameters':sum(p.numel() for p in state.values()),
+        'initialized_equal_to_m4':family == 'M4 final best',
+        'initialized_equal_to_selected_initial':True,'initialization_family':family,
+        'initialization_sha256':getattr(backend, 'initialization_sha256', None)}
 
 @contextmanager
 def teacher_context(backend,runtime):
