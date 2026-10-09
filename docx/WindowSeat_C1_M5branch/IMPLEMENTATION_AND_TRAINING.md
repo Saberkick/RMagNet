@@ -8,7 +8,7 @@
 
 官方 LoRA：
 
-`/share/linmingheng-local/xuke/.cache/huggingface/hub/models--huawei-bayerlab--windowseat-reflection-removal-v1-0/snapshots/c1f59ca02bff68535c976e55e17147b3d9323309e/transformer_lora/pytorch_lora_weights.safetensors`
+`/share/linmingheng-local/xuke/.cache/huggingface/hub/models--huawei-bayerlab--windowseat-reflection-removal-v1-0/snapshots/c1f59ca02bff68535c976e5e17147b3d9323309e/transformer_lora/pytorch_lora_weights.safetensors`
 
 SHA-256：`2f04225c5be1cac69a5d76faf4c95515d5503210cfee73c0bb1e79309f5a74e9`。
 

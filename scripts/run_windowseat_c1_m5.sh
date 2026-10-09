@@ -18,7 +18,7 @@ RGB_CACHE="$PROJECT/data_cache/${RUN_GROUP}_rgb8"
 MEMORY_DIR="$GROUP_ROOT/memory_prepare"
 C1_RUN="$GROUP_ROOT/c1"
 M5_RUN="$GROUP_ROOT/m5"
-INITIAL="$ROOT/.cache/huggingface/hub/models--huawei-bayerlab--windowseat-reflection-removal-v1-0/snapshots/c1f59ca02bff68535c976e55e17147b3d9323309e/transformer_lora/pytorch_lora_weights.safetensors"
+INITIAL="$(uvpython -c "from src.rmagnet.qwen_backend import check_snapshots; print(check_snapshots()[1] / 'transformer_lora/pytorch_lora_weights.safetensors')")"
 EXPECTED_INITIAL=2f04225c5be1cac69a5d76faf4c95515d5503210cfee73c0bb1e79309f5a74e9
 mkdir -p "$GROUP_ROOT/logs" "$CACHE_ROOT/logs"
 exec 9>"$GROUP_ROOT/pipeline.lock"
