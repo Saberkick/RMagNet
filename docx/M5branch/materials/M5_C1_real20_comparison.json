@@ -1,0 +1,47 @@
+{
+  "status": "complete",
+  "count": 20,
+  "means": {
+    "C1-best": {
+      "l1": 0.0419662251137197,
+      "psnr": 25.288404655456542,
+      "ssim": 0.8171754896640777
+    },
+    "C1+M5-best": {
+      "l1": 0.042541643045842646,
+      "psnr": 25.165279960632326,
+      "ssim": 0.8163686782121659
+    },
+    "C1+M5-latest": {
+      "l1": 0.04210856012068689,
+      "psnr": 25.226182651519775,
+      "ssim": 0.8198816031217575
+    },
+    "M4-best(reference)": {
+      "l1": 0.04076556097716093,
+      "psnr": 25.50683937072754,
+      "ssim": 0.819491696357727
+    }
+  },
+  "comparisons": {
+    "best": {
+      "minus_c1": {
+        "l1": 0.000575417932122943,
+        "psnr": -0.12312469482421662,
+        "ssim": -0.0008068114519118597
+      },
+      "psnr_wins": 4
+    },
+    "latest": {
+      "minus_c1": {
+        "l1": 0.00014233500696718415,
+        "psnr": -0.06222200393676758,
+        "ssim": 0.002706113457679793
+      },
+      "psnr_wins": 6
+    }
+  },
+  "elapsed_seconds": 108.0823712348938,
+  "peak_allocated_gib": 10.157190799713135,
+  "note": "Fixed C1-best for both M5 choices; no Qwen inference rerun, no training; historical research dataset, not blind test; native M5 is outside training scale"
+}

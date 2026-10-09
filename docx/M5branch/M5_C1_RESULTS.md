@@ -22,7 +22,7 @@
 
 - 使用现有长宽比和处理尺寸，保存后的8位RGB PNG，逐图宏平均。SSIM沿用项目11×11均匀窗口口径。
 - 本次C1基线用相同PNG重新计算，主指标与历史记录误差小于1e-6。低/高变化mask在本次统一的RGB8读取方式下重算，只用于本次C1与M5对照。
-- M4为历史同测试集主指标参考，没有重新运行M4。未运行real20，也未重新训练。
+- M4为历史同测试集主指标参考，没有重新运行M4。real20评测已补充，见 [M5_C1_REAL20_RESULTS.md](M5_C1_REAL20_RESULTS.md)；没有重新训练。
 - 该测试集已经多次用于研究，且历史初始化有场景重叠，仅属回顾性对照。
 - best结果图：`runs/m5_c1_pixel_e30/eval_test_best/predictions/`。
 - latest结果图：`runs/m5_c1_pixel_e30/eval_test_latest/predictions/`。
