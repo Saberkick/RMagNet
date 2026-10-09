@@ -1,5 +1,7 @@
 # M5新增细节恢复模块：基于SMA/B结果的设计补充
 
+> Historical design. Current implementation and C1-specific run: [M5_C1_PIXEL_IMPLEMENTATION.md](M5_C1_PIXEL_IMPLEMENTATION.md).
+
 日期：2026-10-09。状态：设计，未实现或训练M5。C1正在准备/运行，效果尚未知。本页补充既有M5-Pixel设计，不用C的未来结果作事实依据。
 
 ## 1. 当前实验说明了什么
