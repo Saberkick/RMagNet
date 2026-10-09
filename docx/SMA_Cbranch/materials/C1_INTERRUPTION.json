@@ -1,0 +1,18 @@
+{
+  "training_status": "interrupted_OOM",
+  "requested_epochs": 10,
+  "completed_epochs": 9,
+  "recorded_updates": 466,
+  "best_checkpoint_step": 102,
+  "latest_checkpoint_step": 459,
+  "not_saved_last_updates": 7,
+  "error_location": "rank2 P90 VAE decode; CUDA allocation114MiB",
+  "error_observation": "GPU2 additional process1.02GiB; no changes to that process",
+  "evaluation_gpus": [
+    0,
+    1,
+    3
+  ],
+  "evaluation_status": "running",
+  "retrained": false
+}
