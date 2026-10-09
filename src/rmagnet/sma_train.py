@@ -37,6 +37,7 @@ from .m2a_data_baseline import (
 )
 from .m2b1_q20 import M2ValidationDataset
 from .m3_with_lrec_100e import consistency_loss
+from .sma_joint import install_teacher, teacher_context, lora_parameters, save_joint
 from .sma import SMA, install, SMA_VERSION, forward as forward_from_latent
 from .sma_data import load_manifest as load_m2_manifest
 from .m4_cache import (
@@ -466,6 +467,8 @@ def save_latest(
 
 
 def atomic_save_adapter(path, backend):
+    if getattr(backend, "joint_training", False):
+        return save_joint(path, backend, EXPECTED_INITIAL_SHA256)
     from .m4_cache import atomic_safetensors
     atomic_safetensors(path, backend.sma.state_dict(), {"experiment": "SMA", "architecture": SMA_VERSION, "base_m4_sha256": EXPECTED_INITIAL_SHA256})
 
@@ -515,12 +518,16 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--num-workers", type=int, default=1)
     parser.add_argument("--memory-file", type=Path, default=PROJECT / "runs/sma_memory_pretrain/memory.safetensors")
     parser.add_argument("--continue-run", type=Path, help="Completed parent run; restore latest weights only, epochs denotes cumulative target")
+    parser.add_argument("--joint-lora", action="store_true")
+    parser.add_argument("--lora-learning-rate", type=float, default=5e-6)
     parser.add_argument("--preflight-only", action="store_true")
     return parser.parse_args()
 
 
 def main() -> None:
     args = parse_args()
+    if args.joint_lora and args.continue_run:raise ValueError("Joint B starts fresh, no legacy continuation")
+    if args.joint_lora and args.lora_learning_rate <= 0:raise ValueError("Invalid LoRA LR")
     args.data_root = args.data_root.resolve()
     args.cache_root = args.cache_root.resolve()
     args.run_dir = args.run_dir.resolve()
@@ -574,13 +581,15 @@ def main() -> None:
         "continuation": continuation,
         "validate_every": validate_every,
         "early_stopping_patience_epochs": args.early_stopping_patience,
-        "checkpoint_policy": "best/latest SMA only; fixed M4 weights referenced by SHA256",
+        "checkpoint_policy": ("best/latest joint LoRA+SMA only; fixed teacher referenced by SHA256" if args.joint_lora else "best/latest SMA only; fixed M4 weights referenced by SHA256"),
         "cache_version": cache_manifest["cache_version"],
         "cache_gib": cache_manifest["storage"]["total_gib"],
         "early_blocks": list(EARLY_BLOCKS),
         "mid_blocks": list(MID_BLOCKS),
         "late_blocks": list(LATE_BLOCKS),
         "initialization": str(args.initial),
+        "joint_lora": args.joint_lora,
+        "lora_learning_rate": args.lora_learning_rate if args.joint_lora else None,
         "augmentation": "disabled: cached Qwen features are tied to absolute token positions",
         "auxiliary_gradient_targets": {
             "spatial": args.spatial_gradient_ratio,
@@ -629,6 +638,8 @@ def main() -> None:
     backend.set_trainable_branch("transmission")
     load_initial(backend, args.initial, device)
     backend.set_trainable_branch(None)
+    backend.joint_training = args.joint_lora
+    teacher_audit = install_teacher(backend) if args.joint_lora else None
     sma = SMA().to(device)
     if continuation:
         initial_sma_path = Path(continuation['checkpoint'])
@@ -648,20 +659,26 @@ def main() -> None:
         raise RuntimeError('Fresh readers must be zero; continued readers must contain trained weights')
     sma.freeze_memory()
     runtime = install(backend, sma)
-    parameters = list(sma.readers.parameters())
+    reader_parameters = list(sma.readers.parameters())
+    student_parameters = lora_parameters(backend) if args.joint_lora else []
+    parameters = reader_parameters + student_parameters
     sync_initial_parameters(parameters)
-    if any(p.requires_grad for p in backend.transformer.parameters()) or any(p.requires_grad for p in backend.vae.parameters()):
-        raise RuntimeError("M4 / VAE must remain entirely frozen")
+    if any(p.requires_grad and id(p) not in {id(v) for v in student_parameters} for p in backend.transformer.parameters()) or any(p.requires_grad for p in backend.vae.parameters()):
+        raise RuntimeError("Only student LoRA may train in the backbone")
     backend.transformer.train()
     backend.vae.eval()
     seed_everything(args.seed + rank())
 
     optimizer = torch.optim.AdamW(
-        parameters, lr=args.learning_rate, weight_decay=args.weight_decay
+        reader_parameters,
+        lr=args.learning_rate, weight_decay=args.weight_decay
     )
     scheduler = make_scheduler(
         optimizer, min(args.warmup_steps, planned_steps-initial_step), planned_steps-initial_step
     )
+    lora_optimizer = bnb.optim.PagedAdamW8bit(student_parameters, lr=args.lora_learning_rate, weight_decay=args.weight_decay) if args.joint_lora else None
+    lora_scheduler = make_scheduler(lora_optimizer, min(args.warmup_steps, planned_steps-initial_step), planned_steps-initial_step) if lora_optimizer else None
+    if lora_optimizer:lora_optimizer.zero_grad(set_to_none=True)
     controller = GradientController(
         {
             "spatial": args.spatial_gradient_ratio,
@@ -701,7 +718,11 @@ def main() -> None:
             "memory_file_sha256": sha256(initial_sma_path),
             "continuation": continuation,
             "sma_architecture": SMA_VERSION,
-            "m4_frozen": True,
+            "m4_frozen": not args.joint_lora,
+            "teacher_audit": teacher_audit,
+            "optimizer_policy": "readers FP32 AdamW; student LoRA paged 8-bit AdamW with CPU state offload" if args.joint_lora else "readers FP32 AdamW",
+            "student_lora_parameters": sum(p.numel() for p in student_parameters),
+            "reader_parameters": sum(p.numel() for p in reader_parameters),
             "memory_frozen": True,
             "preflight": preflight,
         }
@@ -742,6 +763,7 @@ def main() -> None:
         )
     dist.barrier()
 
+    student_parameter_ids = {id(p) for p in student_parameters}
     optimizer.zero_grad(set_to_none=True)
     started = time.monotonic()
     global_step = initial_step
@@ -792,7 +814,7 @@ def main() -> None:
                 leaf, target, image, gate, grid_h, grid_w
             )
             # Same fixed M4 teacher as the cache; only new modules are bypassed.
-            with runtime.scope(False):
+            with teacher_context(backend, runtime):
               try:
                   features = online_prediction_features(
                       backend, leaf, expected_tokens
@@ -885,14 +907,18 @@ def main() -> None:
             frozen_clean = all(
                 value.grad is None
                 for name, value in backend.transformer.named_parameters()
-                # Both pretrained backbone and all existing LoRA tensors are frozen.
-                if True
+                if id(value) not in student_parameter_ids
             ) and all(
                 value.grad is None for value in backend.vae.parameters()
             )
             if not frozen_clean:
                 raise RuntimeError("Frozen Qwen/VAE parameters received gradients")
             active_tensors = sync_gradients(parameters, device)
+            reader_norm = torch.stack([p.grad.detach().float().square().sum() for p in reader_parameters if p.grad is not None]).sum().sqrt()
+            lora_norm = torch.stack([p.grad.detach().float().square().sum() for p in student_parameters if p.grad is not None]).sum().sqrt() if student_parameters else torch.zeros((),device=device)
+            if args.joint_lora and (not torch.isfinite(lora_norm) or lora_norm <= 0):raise RuntimeError("Missing student LoRA gradients")
+            probe_parameter = max(student_parameters, key=lambda p:float(p.grad.float().square().sum()) if p.grad is not None else -1) if args.joint_lora and global_step == initial_step else None
+            lora_before = probe_parameter.detach().clone() if probe_parameter is not None else None
             grad_norm = torch.nn.utils.clip_grad_norm_(
                 parameters, args.max_grad_norm
             )
@@ -900,9 +926,16 @@ def main() -> None:
                 raise RuntimeError(f"Invalid SMA reader gradient norm: {grad_norm}")
             before_update = sma.readers["39"].up.weight.detach().clone() if global_step == initial_step else None
             optimizer.step()
+            if lora_optimizer:
+                move_optimizer_state(lora_optimizer, device)
+                lora_optimizer.step()
+                lora_optimizer.zero_grad(set_to_none=True)
+                move_optimizer_state(lora_optimizer, torch.device('cpu'))
             if before_update is not None and torch.equal(before_update, sma.readers["39"].up.weight):
                 raise RuntimeError("First SMA reader output projection failed to update")
+            if lora_before is not None and torch.equal(lora_before, probe_parameter):raise RuntimeError("Student LoRA failed first update")
             scheduler.step()
+            if lora_scheduler:lora_scheduler.step()
             if any(p.grad is not None for p in sma.memory.parameters()):
                 raise RuntimeError("Frozen content memory received gradients")
             optimizer.zero_grad(set_to_none=True)
@@ -958,6 +991,11 @@ def main() -> None:
                     "active_gradient_tensors": active_tensors,
                     "backbone_vae_memory_frozen": True,
                     "reader_first_update_verified": True,
+                    "joint_lora": args.joint_lora,
+                    "student_lora_grad_norm": float(lora_norm),
+                    "reader_grad_norm": float(reader_norm),
+                    "student_lora_update_verified": args.joint_lora,
+                    "lora_lr": lora_scheduler.get_last_lr()[0] if lora_scheduler else None,
                     "lr": scheduler.get_last_lr()[0],
                     "elapsed_seconds": time.monotonic() - started,
                     "peak_allocated_gib": torch.cuda.max_memory_allocated(device) / 2**30,
@@ -1088,6 +1126,7 @@ def main() -> None:
             "epochs_requested": args.epochs,
             "epochs_completed": epoch + 1,
             "optimizer_updates": global_step,
+            "joint_lora": args.joint_lora,
             "optimizer_updates_this_run": global_step-initial_step,
             "epochs_completed_before_start": start_epoch,
             "epochs_completed_this_run": epoch+1-start_epoch,
@@ -1095,7 +1134,7 @@ def main() -> None:
             "early_stopped": early_stopped,
             "early_stopping_patience_epochs": args.early_stopping_patience,
             "epochs_without_improvement": epochs_without_improvement,
-            "checkpoint_policy": "best/latest SMA only; fixed M4 weights referenced by SHA256",
+            "checkpoint_policy": ("best/latest joint LoRA+SMA only; fixed teacher referenced by SHA256" if args.joint_lora else "best/latest SMA only; fixed M4 weights referenced by SHA256"),
             "best_lora": str(
                 args.run_dir / "best_sma.safetensors"
             ),

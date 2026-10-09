@@ -142,9 +142,19 @@ class Runtime:
         is_reader = isinstance(owner, MemoryWrappedBlock) and owner.number in (39, 41)
         if not inputs_require_grad and not (state.enabled and is_reader):
             return function(*args, **kwargs)
+        outer = self.state
+        first_call = True
         def bound(*values):
+            nonlocal first_call
             with self.scope(state.enabled, state.grid, state.memory):
-                return function(*values, **kwargs)
+                result = function(*values, **kwargs)
+                # Joint LoRA makes Q37 checkpointed too. Its detached memory
+                # must reach Q39/Q41 during the original forward; recomputation
+                # keeps its own captured scope and must not overwrite another pass.
+                if first_call:
+                    outer.memory = self.state.memory
+                    first_call = False
+                return result
         return checkpoint(bound, *args, use_reentrant=False)
 
 

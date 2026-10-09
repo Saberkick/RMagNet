@@ -1,4 +1,5 @@
 """Native-size real20 evaluation with matched deterministic official tiling."""
+from .sma_joint import JOINT_VERSION, load_joint
 import argparse, json, math, subprocess, time
 from pathlib import Path
 import torch, safetensors.torch
@@ -30,7 +31,7 @@ def main():
     metadata={}
     if a.checkpoint:
         with safe_open(a.checkpoint,framework='pt') as h:metadata=h.metadata()
-        if metadata.get('architecture')!=SMA_VERSION or metadata.get('base_m4_sha256')!=M4_SHA:
+        if metadata.get('architecture') not in (SMA_VERSION,JOINT_VERSION) or metadata.get('base_m4_sha256')!=M4_SHA:
             raise RuntimeError('SMA identity mismatch')
     device=torch.device('cuda:0');torch.cuda.set_device(device)
     torch.manual_seed(2026);torch.cuda.manual_seed(2026)
@@ -39,7 +40,8 @@ def main():
     runtime=None
     if a.checkpoint:
         sma=SMA().to(device)
-        sma.load_state_dict(safetensors.torch.load_file(a.checkpoint,device=str(device)),strict=True)
+        if metadata['architecture']==JOINT_VERSION:load_joint(a.checkpoint,backend,sma,device,M4_SHA)
+        else:sma.load_state_dict(safetensors.torch.load_file(a.checkpoint,device=str(device)),strict=True)
         sma.requires_grad_(False);sma.eval();runtime=install(backend,sma)
     backend.activate('transmission');backend.transformer.eval();backend.vae.eval()
     if any(p.requires_grad for p in backend.transformer.parameters()):raise RuntimeError('Unfrozen backbone')
