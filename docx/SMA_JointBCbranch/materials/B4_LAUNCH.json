@@ -1,0 +1,28 @@
+{
+  "status": "running",
+  "recorded_at_shanghai": "2026-10-09T10:16:26.832377+08:00",
+  "run": "/share/linmingheng-local/xuke/RMagNet/runs/sma_joint_b_e4",
+  "training_git_commit": "c91c52b9e48ee58c0ad23e2b0541776592a077ba",
+  "planned_epochs": 4,
+  "planned_updates": 204,
+  "stable_step": 24,
+  "stable_peak_rank0_gib": 21.46634006500244,
+  "physical_gpus": [
+    0,
+    1,
+    2,
+    3
+  ],
+  "script": "scripts/run_sma_joint_b.sh",
+  "tmux_session": "sma_joint_b_e4",
+  "console": "runs/sma_launch/joint_b_e4.console.log",
+  "exit_code_file": "runs/sma_launch/joint_b_e4.exit_code",
+  "automatic_after_training": [
+    "best test26",
+    "latest test26",
+    "best real20",
+    "latest real20",
+    "report and comparison panels"
+  ],
+  "C_status": "design only; not implemented/trained"
+}

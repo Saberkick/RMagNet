@@ -5,6 +5,40 @@ from .sma_eval import ROOT
 
 def read(path):return json.loads(path.read_text())
 
+def panels(run,test,real):
+    import random
+    from PIL import Image,ImageDraw
+    from .real20_report import fit
+    data=ROOT/'datasets/rmagnet_sma_dataset2'
+    native=ROOT/'datasets/liyucs_RAGNet/testsets/real20'
+    selected=random.Random(2026).sample(sorted(x['id'] for x in test['M4-best']['per_image']),3)
+    output=run/'panels';output.mkdir(exist_ok=True)
+    for dataset,ids,reports in [('test',selected,test),('real20',['22','47'],real)]:
+        base=data if dataset=='test' else native
+        ext='png' if dataset=='test' else 'jpg'
+        for sid in ids:
+            columns=[('Input',base/'blended'/f'{sid}.{ext}'),('GT',base/'transmission_layer'/f'{sid}.{ext}')]
+            for name,report in reports.items():
+                root=Path(report['checkpoint']).parent
+                if name=='M4-best':root=ROOT/'RMagNet/runs/sma_dataset2_e50' if dataset=='test' else ROOT/'RMagNet/runs/real20_sma_dataset2_e50'
+                if dataset=='test':
+                    choice='test_m4best' if name=='M4-best' else 'test_best' if name in ('SMA50-best','B4-best') else 'test_latest'
+                    path=root/choice/'validation/step_000000/predictions'/f'{sid}.png'
+                else:
+                    if name in ('M4-best','SMA50-best'):
+                        path=ROOT/'RMagNet/runs/real20_sma_dataset2_e50'/('m4best' if name=='M4-best' else 'best')/f'{sid}_windowseat_output.png'
+                    else:path=run/('real20_best' if name=='B4-best' else 'real20_latest')/f'{sid}_windowseat_output.png'
+                columns.append((name,path))
+            canvas=Image.new('RGB',(384*len(columns),346),'white');draw=ImageDraw.Draw(canvas)
+            for col,(name,path) in enumerate(columns):
+                draw.text((col*384+8,8),f'{sid} {name}',fill='black')
+                if name in reports:
+                    item=next(x for x in reports[name]['per_image'] if x['id']==sid)
+                    draw.text((col*384+8,30),f"PSNR {item['psnr']:.3f} SSIM {item['ssim']:.5f}",fill='black')
+                canvas.paste(fit(path,size=(384,288)),(col*384,58))
+            canvas.save(output/f'{dataset}_{sid}.png')
+    (output/'selection.json').write_text(json.dumps({'test_seed':2026,'test_ids':selected,'real20_ids':['22','47']},indent=2)+'\n')
+
 def main():
     ap=argparse.ArgumentParser();ap.add_argument('--run-dir',type=Path,required=True);a=ap.parse_args()
     run=a.run_dir;summary=read(run/'training_summary.json');config=read(run/'run_config.json')
@@ -20,7 +54,7 @@ def main():
         curves.append({'epoch':v['epoch']+1,'step':v['step'],**v['means'],
             **{k:sum(x[k] for x in ts)/len(ts) for k in ('rec_i','rec_p90','student_lora_grad_norm','reader_grad_norm','actual_aux_base_ratio')}})
     with (run/'epoch_metrics.csv').open('w',newline='') as f:
-        w=csv.DictWriter(f,fieldnames=list(curves[0]));w.writeheader();w.writerows(curves)
+        w=csv.DictWriter(f,lineterminator='\n',fieldnames=list(curves[0]));w.writeheader();w.writerows(curves)
     project=ROOT/'RMagNet';old=project/'runs/sma_dataset2_e50'
     test={'M4-best':read(old/'test_m4best/evaluation.json'),
         'SMA50-best':read(old/'test_best/evaluation.json'),
@@ -45,7 +79,8 @@ def main():
             for item in report['per_image']:
                 rows.append({'dataset':dataset,'model':model,'id':item['id'],**{k:item[k] for k in ('l1','psnr','ssim')}})
     with (run/'comparison_per_image.csv').open('w',newline='') as f:
-        w=csv.DictWriter(f,fieldnames=list(rows[0]));w.writeheader();w.writerows(rows)
+        w=csv.DictWriter(f,lineterminator='\n',fieldnames=list(rows[0]));w.writeheader();w.writerows(rows)
+    panels(run,test,real)
     lines=['# 实验 B4：LoRA 与 SMA 联合训练结果','',
         f"- 完成 {summary['epochs_completed']} epoch / {summary['optimizer_updates']} 更新；初始化为 M4-best 与 fresh SMA readers。",
         f"- 可训练 LoRA {config['student_lora_parameters']:,} 参数，读取模块 {config['reader_parameters']:,} 参数。",

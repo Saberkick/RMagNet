@@ -98,16 +98,17 @@ z_l(x)=A_l h_l(x)
 $$
 
 $$
-\Delta h_l(x)=B_l\left[\left(1+\alpha_l g_l(x)\tanh U_l(C(x))\right)\odot z_l(x)\right]
+\Delta h_l(x)=B_l\left[\left(1+\gamma_l g_l(x)\tanh U_l(C(x))\right)\odot z_l(x)\right]
 $$
 
 - A/B 从 M4 LoRA 初始化并参与训练。
 - Q37 提取空间语义，用小型可训练投影得到 C；第一轮保留已有冻结语义记忆，避免重训一个大语义网络。
+- 已核对官方适配器 rank=128、lora_alpha=128、dropout=0。第一版具体调节 Q39/Q41 的 `img_mlp.net.0.proj` 与 `img_mlp.net.2`，U(C)输出128个低秩通道系数；gamma为新增参数，与原lora_alpha不同。
 - 第一版只在 Q39/Q41 的图像 token FFN 线性层接入条件调节，暂不修改混合文本/图像 attention 的 Q/K。必须保持 token 空间对应、处理不同长宽比和真实 LoRA rank。
-- alpha 从0开始，初始化严格复现 M4；U 采用非零小随机初始化。alpha 与 U 不能同时全零，否则梯度可能同时阻断。
+- gamma 从0开始，初始化严格复现 M4；U 采用非零小随机初始化。gamma 与 U 不能同时全零，否则梯度可能同时阻断。
 - 只在 image token 上调节；文本与 timestep 路径不受空间 map 的错误广播影响。
 - 不再同时保留原读出残差作为第二条未经消融的强语义通道；C0/C1 使用同一条件结构。
-- 学生 LoRA、条件投影、alpha、可靠性门控联合训练；主干、VAE、监督教师冻结。
+- 学生 LoRA、条件投影、gamma、可靠性门控联合训练；主干、VAE、监督教师冻结。
 
 这里“更顺滑”指语义改变具体低秩编辑通道，并由同一图像重建目标训练。不能仅凭结构断言其效果优于残差注入。
 

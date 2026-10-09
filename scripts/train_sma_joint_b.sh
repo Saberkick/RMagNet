@@ -3,6 +3,8 @@ set -euo pipefail
 source /share/linmingheng-local/xuke/RMagNet/scripts/sma_env.sh
 export CUDA_VISIBLE_DEVICES="${CUDA_VISIBLE_DEVICES:-0,1,2,3}"
 check_gpus
+IFS=',' read -r -a gpu_list <<< "$CUDA_VISIBLE_DEVICES"
+(( ${#gpu_list[@]} == 4 )) || { echo "B requires exactly four GPUs" >&2; exit 2; }
 EPOCHS="${1:-${EPOCHS:-4}}"
 [[ "$EPOCHS" =~ ^[1-9][0-9]*$ && "$EPOCHS" -le 20 ]] || exit 2
 DATA="$ROOT/datasets/rmagnet_sma_dataset2"
