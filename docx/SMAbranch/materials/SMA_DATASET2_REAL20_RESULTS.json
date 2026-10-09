@@ -1,0 +1,95 @@
+{
+  "status": "complete",
+  "dataset": "real20",
+  "sample_count": 20,
+  "means": {
+    "M4-best": {
+      "l1": 0.04076556097716093,
+      "psnr": 25.50683937072754,
+      "ssim": 0.819491696357727
+    },
+    "SMA-best (epoch 2)": {
+      "l1": 0.04132134392857552,
+      "psnr": 25.386007690429686,
+      "ssim": 0.8182436317205429
+    },
+    "SMA-latest (epoch 50)": {
+      "l1": 0.04749552123248577,
+      "psnr": 24.37991147041321,
+      "ssim": 0.8061045467853546
+    }
+  },
+  "comparison_to_m4": {
+    "best": {
+      "minus_m4": {
+        "l1": 0.0005557829514145907,
+        "psnr": -0.1208316802978544,
+        "ssim": -0.0012480646371840765
+      },
+      "wins_out_of_20": {
+        "l1": 6,
+        "psnr": 7,
+        "ssim": 6
+      }
+    },
+    "latest": {
+      "minus_m4": {
+        "l1": 0.006729960255324845,
+        "psnr": -1.1269279003143318,
+        "ssim": -0.013387149572372414
+      },
+      "wins_out_of_20": {
+        "l1": 4,
+        "psnr": 4,
+        "ssim": 6
+      }
+    }
+  },
+  "protocol": {
+    "dataset_commit": "75467a50dcbf1558dbb6b7b70cdcbefc78a4d242",
+    "vae_posterior": "mode",
+    "seed": 2026,
+    "processing_resolution": 768,
+    "tiling": "official short-edge tiles, official Lanczos stitching, native output size",
+    "metric_domain": "saved 8-bit RGB PNG vs native GT JPEG; image macro average; same SSIM as earlier real20",
+    "inference_inputs": "ordinary I only; no GT, P90, DoLP or training cache supplied to model"
+  },
+  "checkpoints": {
+    "M4-best": {
+      "checkpoint": "/share/linmingheng-local/xuke/RMagNet/runs/m4_best_newcache_e20_p4/best_transmission_lora.safetensors",
+      "checkpoint_sha256": "897282b1bb9cfe61f96530df72edcf8a44a066bb819a3663e9100862aefdb2a3",
+      "checkpoint_training": {},
+      "peak_cuda_gib": 17.57063388824463,
+      "tile_checks": {
+        "tiles": 40,
+        "sma_enabled_tiles": 0
+      }
+    },
+    "SMA-best (epoch 2)": {
+      "checkpoint": "/share/linmingheng-local/xuke/RMagNet/runs/sma_dataset2_e50/best_sma.safetensors",
+      "checkpoint_sha256": "6bac95853a1a06e33e8b50894ff11cd2adff27db40d36847609e45a57a8ac37b",
+      "checkpoint_training": {
+        "step": 102,
+        "epoch": 2
+      },
+      "peak_cuda_gib": 17.57063388824463,
+      "tile_checks": {
+        "tiles": 40,
+        "sma_enabled_tiles": 40
+      }
+    },
+    "SMA-latest (epoch 50)": {
+      "checkpoint": "/share/linmingheng-local/xuke/RMagNet/runs/sma_dataset2_e50/latest_sma.safetensors",
+      "checkpoint_sha256": "3e7da6d841ad3bef9c4899713401773ac91648b6c3fb5c37d2d2250516a745e4",
+      "checkpoint_training": {
+        "step": 2550,
+        "epoch": 50
+      },
+      "peak_cuda_gib": 17.57063388824463,
+      "tile_checks": {
+        "tiles": 40,
+        "sma_enabled_tiles": 40
+      }
+    }
+  }
+}
