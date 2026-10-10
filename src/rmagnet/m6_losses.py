@@ -21,6 +21,16 @@ def build_directions(q_i, q_gt, q_p90, gate, valid):
         np_, ng = delta_p.norm(dim=-1), delta_gt.norm(dim=-1)
         u = F.normalize(delta_p, dim=-1, eps=1e-6)
         cosine = (u * F.normalize(delta_gt, dim=-1, eps=1e-6)).sum(-1)
+        if RULE.get('direction_mode') == 'unfiltered':
+            good = torch.isfinite(u).all(-1) & (delta_p.norm(dim=-1) > 1e-12)
+            directions[l] = u
+            layer_valid.append(good)
+            confidence[l] = good.float()
+            diagnostics[str(l)] = {'alignment_mean': float(cosine.mean()),
+                'norm_i_p90_mean': float(np_.mean()), 'norm_i_gt_mean': float(ng.mean()),
+                'valid_fraction': float(good.float().mean()),
+                'negative_alignment_fraction': float((cosine < 0).float().mean())}
+            continue
         calibrated = RULE.get('direction_mode') == 'gt-calibrated'
         reliability = cosine.abs() if calibrated else cosine
         if calibrated:
@@ -34,6 +44,10 @@ def build_directions(q_i, q_gt, q_p90, gate, valid):
                                'norm_i_gt_mean': float(ng.mean()),
                                'valid_fraction': float(good.float().mean()),
                                'negative_alignment_fraction': float((cosine < 0).float().mean())}
+    if RULE.get('direction_mode') == 'unfiltered':
+        mass = float(torch.stack(list(confidence.values())).mean())
+        return directions, confidence, {'layers': diagnostics,
+            'confidence_mass_before_skip': mass, 'active': mass > 0}
     quorum = torch.stack(layer_valid).sum(0) >= RULE['min_layers']
     masks = {l: gate.float() * confidence[l] * quorum * layer_valid[j]
              for j, l in enumerate(MID)}
@@ -53,7 +67,8 @@ def negative_loss(features, batch, device):
         if float(mask.sum()) <= 1e-8:
             continue
         residual = ((pred - target) * u).sum(-1)
-        values.append((mask * residual.clamp_min(0).square()).sum() / mask.sum())
+        error = residual.square() if RULE.get('direction_mode') == 'unfiltered' else residual.clamp_min(0).square()
+        values.append((mask * error).sum() / mask.sum())
         active_fractions.append((mask * (residual > 0).float()).sum() / mask.sum())
     if not values:
         z = features[MID[0]].sum().float() * 0.0

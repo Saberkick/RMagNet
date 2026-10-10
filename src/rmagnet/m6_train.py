@@ -26,7 +26,7 @@ from .m4_train import (M4Dataset, token_weights, texture_loss, semantic_loss,
                        spatial_loss, online_prediction_features)
 from .m4_cache import atomic_json, sha256
 from .m6_common import (CACHE, DATA, PROJECT, INITIAL, INITIAL_SHA, VERSION, RULE_SHA,
-    MID, load_dataset, load_backend, audit_sources, require_space, check_lineage, teacher_identity)
+    MID, DIRECTION_MODE, load_dataset, load_backend, audit_sources, require_space, check_lineage, teacher_identity)
 from .m6_losses import M6GradientController, negative_loss
 from .qwen_backend import ADAPTER_NAMES
 from .qwen_layer_probe import deterministic_encode
@@ -45,6 +45,12 @@ class M6Dataset(M4Dataset):
                     item[key] = f.get_tensor(key)
                     if not torch.isfinite(item[key].float()).all():
                         raise RuntimeError(f'Nonfinite negative reference {item["id"]}/{key}')
+            if DIRECTION_MODE == 'unfiltered':
+                # Immutable packs retain their original metadata; legacy zero
+                # masks are never used by this explicitly versioned recipe.
+                for l in MID:
+                    direction = item[f'q{l}_negative_direction'].float()
+                    item[f'q{l}_negative_weight'] = (direction.norm(dim=-1) > 1e-12).float()
         return item
 
 def load_references(cache, data, train_ids):
@@ -60,7 +66,11 @@ def load_references(cache, data, train_ids):
         raise RuntimeError('M6 reference coverage differs from train')
     for sid, row in rows.items():
         path = cache / row['cache']
-        if sha256(path) != row['cache_sha256']:
+        if path.stat().st_size != row['cache_bytes']:
+            raise RuntimeError(f'M6 reference size mismatch {sid}')
+        # Shared immutable files need one complete checksum scan per launch.
+        # Other ranks wait at initialization/barriers until rank 0 has passed.
+        if int(os.environ.get('RANK', '0')) == 0 and sha256(path) != row['cache_sha256']:
             raise RuntimeError(f'M6 reference hash mismatch {sid}')
     return m, rows
 
@@ -197,7 +207,8 @@ def main():
         p.error('Invalid epoch/step budget')
     m, records, splits = load_dataset(args.data_root)
     cache_m, cache_records = load_references(args.cache_root, args.data_root, splits['train'])
-    audit_sources(args.data_root, records, splits['train'])
+    if int(os.environ.get('RANK', '0')) == 0:
+        audit_sources(args.data_root, records, splits['train'])
     dataset = M6Dataset(args.data_root, args.cache_root, records, cache_records, splits['train'], False)
     replicas = int(os.environ.get('WORLD_SIZE', '1'))
     steps_per_epoch = len(grouped_global_batches(dataset, args.seed, 0, replicas))
@@ -251,6 +262,7 @@ def main():
             'cache_manifest_sha256': sha256(args.cache_root / 'manifest.json'),
             'git_commit': subprocess.check_output(['git', '-C', str(PROJECT), 'rev-parse', 'HEAD'], text=True).strip(),
             'gpu_binding': os.environ.get('CUDA_VISIBLE_DEVICES'),
+            'direction_mode': DIRECTION_MODE, 'direction_rule': cache_m['formula'],
             'learning_rate': 5e-6, 'semantic_targets': {'positive': 0.06, 'negative': 0.02},
             'semantic_cap': 0.08, 'auxiliary_cap': 0.25,
             'checkpoint_policy': 'best/latest adapters only; no optimizer state', 'early_stopping': False})

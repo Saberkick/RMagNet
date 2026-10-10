@@ -38,8 +38,8 @@ assert not bad_stats['active'] and all(float(v.sum()) == 0 for v in bad_masks.va
 reverse_u, reverse_masks, reverse_stats = build_directions(
     {l: i for l in MID}, {l: gt for l in MID}, {l: gt for l in MID},
     torch.ones(n), torch.ones(n, dtype=torch.bool))
-assert reverse_stats['active'] == (DIRECTION_MODE == 'gt-calibrated')
-if DIRECTION_MODE == 'gt-calibrated':
+assert reverse_stats['active'] == (DIRECTION_MODE in ('gt-calibrated', 'unfiltered'))
+if DIRECTION_MODE in ('gt-calibrated', 'unfiltered'):
     reverse_batch = {f'q{l}_{role}': value[None]
                      for l in MID for role, value in (
                          ('gt', gt), ('negative_direction', reverse_u[l]),

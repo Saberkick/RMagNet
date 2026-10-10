@@ -13,11 +13,12 @@ from .qwen_backend import QwenSharedBackend
 ROOT = Path('/share/linmingheng-local/xuke')
 PROJECT = Path(__file__).resolve().parents[2]
 DATA = ROOT / 'datasets/rmagnet_sma_dataset3'
-DIRECTION_MODE = os.environ.get('M6_DIRECTION_MODE', 'strict')
-if DIRECTION_MODE not in ('strict', 'gt-calibrated'):
-    raise ValueError('M6_DIRECTION_MODE must be strict or gt-calibrated')
+DIRECTION_MODE = os.environ.get('M6_DIRECTION_MODE', 'unfiltered')
+if DIRECTION_MODE not in ('strict', 'gt-calibrated', 'unfiltered'):
+    raise ValueError('Invalid M6_DIRECTION_MODE')
 CACHE = PROJECT / ('data_cache/m6_polar_negative_v1' if DIRECTION_MODE == 'strict'
-                   else 'data_cache/m6_gt_calibrated_v2')
+                   else 'data_cache/m6_gt_calibrated_v2' if DIRECTION_MODE == 'gt-calibrated'
+                   else 'data_cache/m6_unfiltered_v3')
 INITIAL = ROOT / 'RMagNet/runs/m4_e30_p4/best_transmission_lora.safetensors'
 INITIAL_SHA = '5725d32b04e1271d51a33f7512174f1035ff0acf5e5427bdd3b179e98e1a13eb'
 DATA_SHA = 'bb211d1de9d399c685d70e80ef292d9a86b9e6733fb78cf1c1724d0d591bb77c'
@@ -37,6 +38,15 @@ if DIRECTION_MODE == 'gt-calibrated':
     VERSION = 'm6-gt-calibrated-v2'
     RULE.update(version=VERSION, direction_mode=DIRECTION_MODE,
                 reliability='absolute GT alignment', polarity='sign of GT alignment')
+    RULE_SHA = hashlib.sha256(json.dumps(RULE, sort_keys=True).encode()).hexdigest()
+elif DIRECTION_MODE == 'unfiltered':
+    VERSION = 'm6-unfiltered-v3'
+    RULE = {k: v for k, v in RULE.items() if k not in (
+        'min_norm', 'align_low', 'align_width', 'min_layers', 'min_mass',
+        'saturation_u8', 'max_saturation_fraction')}
+    RULE.update(version=VERSION, direction_mode=DIRECTION_MODE,
+                reliability='none; finite nonzero vectors only',
+                polarity='raw P90-I45; no flipping', loss='GT-anchored squared projection, both signs')
     RULE_SHA = hashlib.sha256(json.dumps(RULE, sort_keys=True).encode()).hexdigest()
 
 def load_dataset(root: Path):
@@ -143,6 +153,8 @@ def teacher_identity():
 
 def check_lineage(records: dict, splits: dict):
     old = ROOT / 'RMagNet/data_cache/m4_multilayer_v1/manifest.json'
+    if not old.is_file():
+        old = PROJECT / 'docx/M6branch/M6_HISTORICAL_M4_CACHE_MANIFEST.json'
     m = json.loads(old.read_text())
     old_ids = {s['id'] for s in m['samples']} | set(m.get('local_filter', {}).get('removed_ids', []))
     old_groups = {s.split('_')[0] for s in old_ids}

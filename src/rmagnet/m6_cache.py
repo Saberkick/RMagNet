@@ -92,6 +92,8 @@ def old_reference(root, sid, hashes):
     return safetensors.torch.load_file(str(f))
 
 def unsaturated(images, gh, gw):
+    if RULE.get('direction_mode') == 'unfiltered':
+        return torch.ones(gh * gw, dtype=torch.bool)
     fractions = []
     for image in images:
         sat = ((image[0].float() + 1) * 127.5 >= 250).any(0).float()[None, None]
