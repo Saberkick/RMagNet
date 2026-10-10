@@ -11,7 +11,7 @@ OFFICIAL_SHA='2f04225c5be1cac69a5d76faf4c95515d5503210cfee73c0bb1e79309f5a74e9'
 def main():
     p=argparse.ArgumentParser();p.add_argument('--data-root',type=Path,required=True);p.add_argument('--output',type=Path,required=True);a=p.parse_args()
     manifest,records,splits=load_manifest(a.data_root)
-    assert {k:len(v) for k,v in splits.items()}=={'train':168,'validation':20,'test':19}
+    assert len(splits['train']) % 4 == 0 and all(splits.values())
     base,lora=check_snapshots();adapter=lora/'transformer_lora/pytorch_lora_weights.safetensors'
     assert sha256(adapter)==OFFICIAL_SHA
     with safe_open(adapter,framework='pt') as f:count=len(f.keys())

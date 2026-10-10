@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
+if [[ "${CUDA_VISIBLE_DEVICES:-0,1,2,3}" != *,* ]]; then
+  exec bash "$(dirname "$0")/run_windowseat_c1_m5_single.sh" "$@"
+fi
 source "$(dirname "$0")/sma_env.sh"
 export CUDA_VISIBLE_DEVICES="${CUDA_VISIBLE_DEVICES:-0,1,2,3}"
 export OMP_NUM_THREADS="${OMP_NUM_THREADS:-1}"

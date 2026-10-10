@@ -39,6 +39,22 @@ def main():
     if previous:
         for k in ('version','checkpoint_sha256','dataset_manifest_sha256','vae_posterior','condition_mode','quantization'):
             if previous[k]!=identity[k]:raise RuntimeError('Cache identity changed: '+k)
+    if previous and previous.get('complete'):
+        # Once M5 starts, its RGB manifest is part of the resume identity.
+        # Validate and leave it byte-for-byte unchanged on restart.
+        done=previous.get('samples',{})
+        if set(done)!=set(records):raise RuntimeError('Complete RGB cache IDs mismatch')
+        for split,ids in splits.items():
+            for sid in ids:
+                r=records[sid];cached=done[sid];out=a.cache/'predictions'/f'{sid}.png'
+                if cached['split']!=split or cached['size']!=r['target_size']:
+                    raise RuntimeError('Complete RGB cache split/geometry mismatch '+sid)
+                if cached['input_sha256']!=r['processed']['input']['sha256'] or cached['gt_sha256']!=r['processed']['gt']['sha256']:
+                    raise RuntimeError('Complete RGB cache data mismatch '+sid)
+                if not out.is_file() or sha256(out)!=cached['prediction_sha256']:
+                    raise RuntimeError('Corrupt complete RGB cache '+sid)
+        print('Reusing complete RGB cache without modifying manifest',flush=True)
+        return
     done=previous.get('samples',{}) if previous else {};identity.update(complete=False,samples=done)
     def flush():
         tmp=index.with_suffix('.tmp');tmp.write_text(json.dumps(identity,indent=2)+'\n');tmp.replace(index)

@@ -67,12 +67,16 @@ def prepare(a):
     samples = []
     if a.base:
         old = json.loads((a.base/'manifest.json').read_text())
-        if old['version'] != 'm2-variable-aspect-v3-excluded-misaligned' or old.get('label_noise'):
-            raise RuntimeError('Merge requires the original clean v3 dataset')
+        supported = {'m2-variable-aspect-v3-excluded-misaligned',
+                     'sma-variable-aspect-v4-expanded-clean-localfilter-20261009'}
+        if old['version'] not in supported or old.get('label_noise') or not old.get('complete'):
+            raise RuntimeError('Merge requires a supported complete clean dataset')
+        from .sma_data import load_manifest
+        load_manifest(a.base)
         samples = copy.deepcopy(old['samples'])
         for r in samples:
             inherited[r['group']] = r['split']
-            r['dataset_source'] = 'original-clean-v3'
+            r.setdefault('dataset_source', 'original-clean-v3')
         excluded_ids = {r['id'] for r in old.get('excluded_samples', [])}
         if excluded_ids & {r['id'] for r in fresh}:
             raise RuntimeError('Excluded scene supplied again')
@@ -82,7 +86,7 @@ def prepare(a):
     # Byte-identical original images in another group would leak supervision.
     prior_hashes = {v['sha256']:r['group'] for r in samples for v in r['source'].values()}
     for r in fresh:
-        r['dataset_source'] = 'data_set2'
+        r['dataset_source'] = a.source_tag
         for v in r['source'].values():
             if v['sha256'] in prior_hashes and prior_hashes[v['sha256']] != r['group']:
                 raise RuntimeError(f'Duplicate source across capture groups: {r["id"]}')
@@ -119,7 +123,7 @@ def prepare(a):
     if any(len(s)>1 for s in target_splits.values()):
         raise RuntimeError('Identical GT image crosses splits')
     previews = prep.build_previews(output, {r['id']:r for r in fresh})
-    manifest = {'complete':True, 'version':VERSION, 'created_utc':datetime.now(timezone.utc).isoformat(),
+    manifest = {'complete':True, 'version':a.dataset_version, 'created_utc':datetime.now(timezone.utc).isoformat(),
         'label_correction':{'status':'applied','new_source_mapping':a.labels,'authority':'explicit user confirmation'},
         'source_archive':{'path':str(a.archive),'sha256':prep.sha256_path(a.archive),'bytes':a.archive.stat().st_size},
         'base_dataset':{'path':str(a.base),'manifest_sha256':prep.sha256_path(a.base/'manifest.json')} if old else None,
@@ -160,6 +164,8 @@ def main():
     p.add_argument('mode',choices=['prepare','reuse-cache'])
     p.add_argument('--archive',type=Path);p.add_argument('--output',type=Path,required=True)
     p.add_argument('--base',type=Path);p.add_argument('--labels',choices=['gt-suffix','bare-gt'])
+    p.add_argument('--source-tag', default='data_set2')
+    p.add_argument('--dataset-version', choices=[VERSION, 'sma-variable-aspect-v5-expanded-data3-clean'], default=VERSION)
     p.add_argument('--seed',type=int,default=2026);p.add_argument('--cache',type=Path);p.add_argument('--reuse-cache',type=Path)
     a=p.parse_args()
     if a.mode=='prepare':

@@ -9,7 +9,8 @@ def load_manifest(root):
     manifest = json.loads((root/"manifest.json").read_text())
     versions = {"m2-variable-aspect-v2-corrected-labels": 18,
                 "m2-variable-aspect-v3-excluded-misaligned": 17,
-                "sma-variable-aspect-v4-expanded-clean": None}
+                "sma-variable-aspect-v4-expanded-clean": None,
+                "sma-variable-aspect-v5-expanded-data3-clean": None}
     version = manifest.get("version")
     filtered = isinstance(version, str) and version.endswith('-localfilter-20261009')
     base_version = version.removesuffix('-localfilter-20261009') if filtered else version
@@ -26,7 +27,7 @@ def load_manifest(root):
     records = {r["id"]: r for r in manifest["samples"]}
     if len(records)!=len(manifest["samples"]):raise RuntimeError("Duplicate dataset IDs")
     splits = {s: (root/"splits"/f"{s}.txt").read_text().split() for s in ("train", "validation", "test")}
-    if base_version == "sma-variable-aspect-v4-expanded-clean" or filtered:
+    if versions[base_version] is None or filtered:
         actual = {k:len(v) for k,v in splits.items()}
         if actual != manifest['split']['sample_counts'] or min(actual.values())<1 or actual['train']%4:
             raise RuntimeError("Expanded dataset split accounting mismatch")
