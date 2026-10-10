@@ -2,7 +2,7 @@
 
 日期：2026-10-10。状态：**M6-B 已实现，已授权运行5个epoch，仅保留best/latest**。实际资源与执行记录见 M6_IMPLEMENTATION_AND_RUN.md。
 
-**实施预检更新：204张训练图均未通过下面的严格单向规则，训练尚未启动。** 建议的GT校准候选轴方案单独记录在`M6_DIRECTION_PREFLIGHT_AND_CALIBRATION.md`，未经用户选择不替换本文件的原假设。
+**本文件为已废止的原始strict设计。** 用户随后明确指定不筛选方向，当前训练方案见`M6_UNFILTERED_TRAINING.md`。下面保留原假设与失败历程，不能作为当前训练配置。
 
 ## 1. 要验证的问题
 
