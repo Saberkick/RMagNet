@@ -1,0 +1,34 @@
+{
+  "checked_at_utc": "2026-10-10T13:54:17.710814+00:00",
+  "status": "training_stable_then_detach",
+  "tmux": "m6_b_e5",
+  "run_dir": "/share/linmingheng-local/xuke/RMagNet-M6/runs/m6_b_e5",
+  "physical_gpus": [
+    1,
+    3
+  ],
+  "epochs": 5,
+  "planned_updates": 510,
+  "observed_updates": 18,
+  "actual_direction_mode": "unfiltered",
+  "initial_sha256": "5725d32b04e1271d51a33f7512174f1035ff0acf5e5427bdd3b179e98e1a13eb",
+  "source_git_commit": "1a6ab4f561738143372fd46139ee5f4df600d716",
+  "cache_manifest_sha256": "1f81831405f9257cceeb918ea53ba2f39f6691a87edc058f96d8fb2c81694a9f",
+  "checks": {
+    "real_loss_nonzero": true,
+    "real_loss_gradient_nonzero": true,
+    "first_five_parameter_changes_nonzero": true,
+    "frozen_backbone_and_vae_checked_each_update": true,
+    "both_gpus_computing_confirmed": true,
+    "checkpoint_policy": "best/latest only",
+    "other_tmux_job_preserved": "ws_c1_m5_d3_s1"
+  },
+  "latest_observed": {
+    "negative": 0.04516254924237728,
+    "negative_raw_norm": 0.40103060752153397,
+    "negative_actual_ratio": 0.006970080366919087,
+    "peak_allocated_gib": 21.353621006011963,
+    "peak_reserved_gib": 23.173828125
+  },
+  "cleanup_report": "results_archive/M6/cleanup_20261010/cleanup_report.json"
+}
