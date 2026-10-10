@@ -1,0 +1,15 @@
+{
+  "status": "strict_direction_rejected_preflight",
+  "samples": 204,
+  "active_samples": 0,
+  "maximum_confidence_mass": 0.0007053761510178447,
+  "minimum_required_confidence_mass": 0.01,
+  "median_alignment": {
+    "37": -0.28594957292079926,
+    "39": -0.29347382485866547,
+    "41": -0.28657279908657074
+  },
+  "training_started": false,
+  "other_job_stopped": false,
+  "alternate_mode": "gt-calibrated requires user selection"
+}

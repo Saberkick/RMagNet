@@ -12,6 +12,12 @@ export UV_CACHE_DIR="$ROOT/.cache/uv" UV_OFFLINE=1 TMPDIR="$ROOT/tmp"
 export OMP_NUM_THREADS="${OMP_NUM_THREADS:-1}" MKL_NUM_THREADS="${OMP_NUM_THREADS:-1}"
 export OPENBLAS_NUM_THREADS="${OMP_NUM_THREADS:-1}" NUMEXPR_NUM_THREADS="${OMP_NUM_THREADS:-1}"
 export PYTHONUNBUFFERED=1 PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
+export M6_DIRECTION_MODE="${M6_DIRECTION_MODE:-strict}"
+case "$M6_DIRECTION_MODE" in
+  strict) M6_CACHE_DEFAULT="$PROJECT/data_cache/m6_polar_negative_v1" ;;
+  gt-calibrated) M6_CACHE_DEFAULT="$PROJECT/data_cache/m6_gt_calibrated_v2" ;;
+  *) echo 'Invalid M6_DIRECTION_MODE' >&2; return 2 ;;
+esac
 mkdir -p "$TMPDIR"
 cd "$PROJECT"
 py() { "$UV_BIN" run --no-project --python "$PYTHON" python "$@"; }

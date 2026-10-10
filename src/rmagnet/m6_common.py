@@ -13,7 +13,11 @@ from .qwen_backend import QwenSharedBackend
 ROOT = Path('/share/linmingheng-local/xuke')
 PROJECT = Path(__file__).resolve().parents[2]
 DATA = ROOT / 'datasets/rmagnet_sma_dataset3'
-CACHE = PROJECT / 'data_cache/m6_polar_negative_v1'
+DIRECTION_MODE = os.environ.get('M6_DIRECTION_MODE', 'strict')
+if DIRECTION_MODE not in ('strict', 'gt-calibrated'):
+    raise ValueError('M6_DIRECTION_MODE must be strict or gt-calibrated')
+CACHE = PROJECT / ('data_cache/m6_polar_negative_v1' if DIRECTION_MODE == 'strict'
+                   else 'data_cache/m6_gt_calibrated_v2')
 INITIAL = ROOT / 'RMagNet/runs/m4_e30_p4/best_transmission_lora.safetensors'
 INITIAL_SHA = '5725d32b04e1271d51a33f7512174f1035ff0acf5e5427bdd3b179e98e1a13eb'
 DATA_SHA = 'bb211d1de9d399c685d70e80ef292d9a86b9e6733fb78cf1c1724d0d591bb77c'
@@ -28,6 +32,12 @@ RULE = {'version': VERSION, 'teacher': 'all LoRA disabled', 'timestep': 499,
         'min_layers': 2, 'min_mass': 0.01, 'saturation_u8': 250,
         'max_saturation_fraction': 0.1}
 RULE_SHA = hashlib.sha256(json.dumps(RULE, sort_keys=True).encode()).hexdigest()
+STRICT_RULE_SHA = RULE_SHA
+if DIRECTION_MODE == 'gt-calibrated':
+    VERSION = 'm6-gt-calibrated-v2'
+    RULE.update(version=VERSION, direction_mode=DIRECTION_MODE,
+                reliability='absolute GT alignment', polarity='sign of GT alignment')
+    RULE_SHA = hashlib.sha256(json.dumps(RULE, sort_keys=True).encode()).hexdigest()
 
 def load_dataset(root: Path):
     root = root.resolve()
@@ -101,6 +111,15 @@ def model_load_lock():
 
 def load_backend(device: torch.device):
     with model_load_lock():
+        free, total = torch.cuda.mem_get_info(device)
+        info = {'event': 'model_load_binding', 'pid': os.getpid(),
+                'visible_devices': os.environ.get('CUDA_VISIBLE_DEVICES'),
+                'local_device': str(device),
+                'uuid': str(torch.cuda.get_device_properties(device).uuid),
+                'cuda_free_gib': free / 2**30}
+        print(json.dumps(info), flush=True)
+        if free < 20 * 2**30:
+            raise RuntimeError('GPU became busy before model loading; leave its other process running')
         backend = QwenSharedBackend.from_local(device)
     return backend
 

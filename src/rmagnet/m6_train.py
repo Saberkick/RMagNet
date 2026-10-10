@@ -7,7 +7,7 @@ import os
 import shutil
 import subprocess
 import time
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from pathlib import Path
 import bitsandbytes as bnb
 import lpips
@@ -67,6 +67,16 @@ def load_references(cache, data, train_ids):
 def barrier():
     if dist.is_initialized():
         dist.barrier()
+
+def initialize_distributed():
+    local = int(os.environ.get('LOCAL_RANK', '0'))
+    torch.cuda.set_device(local)
+    device = torch.device('cuda', local)
+    if int(os.environ.get('WORLD_SIZE', '1')) > 1:
+        # Model reads may be slow on this shared filesystem; serialize CPU load
+        # without making the earliest rank time out at its first broadcast.
+        dist.init_process_group(backend='nccl', device_id=device, timeout=timedelta(hours=2))
+    return device
 
 def finish_validation(backend, loader, device, lpips_model, run_dir, step, epoch, args):
     report = validate(backend, loader, device, lpips_model, run_dir, step, args.seed)
@@ -202,7 +212,7 @@ def main():
     if args.preflight_only:
         print(json.dumps(preflight, indent=2)); return
     require_space(16)
-    device = setup_distributed()
+    device = initialize_distributed()
     main_rank = rank() == 0
     if main_rank:
         if args.run_dir.exists() and any(args.run_dir.iterdir()):

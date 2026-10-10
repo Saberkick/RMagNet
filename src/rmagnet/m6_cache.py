@@ -14,7 +14,7 @@ import torch
 import torch.nn.functional as F
 from .m4_cache import atomic_json, atomic_safetensors, build_gate, sha256
 from .m6_common import (CACHE, DATA, PROJECT, ROOT, VERSION, RULE, RULE_SHA,
-                       MID, EARLY, LATE, load_dataset, load_backend, source_paths,
+                       MID, EARLY, LATE, STRICT_RULE_SHA, load_dataset, load_backend, source_paths,
                        audit_sources, require_space, check_lineage, teacher_identity)
 from .m6_losses import build_directions
 from .qwen_layer_probe import deterministic_encode
@@ -63,6 +63,17 @@ def valid_record(output, sid, hashes=None):
         return False
 
 def old_reference(root, sid, hashes):
+    # The failed strict preflight already computed consistent M4 references.
+    # Reuse only its GT/early/gate tensors; recompute I/P90 and all new masks.
+    record = root / 'records' / f'{sid}.json'
+    if record.is_file() and not (root / 'manifest.json').is_file():
+        r = json.loads(record.read_text())
+        if r.get('rule_sha256') == STRICT_RULE_SHA and r.get('source_sha256') == hashes:
+            f = root / r['cache']
+            if f.stat().st_size != r['cache_bytes'] or sha256(f) != r['cache_sha256']:
+                raise RuntimeError(f'Strict candidate cache hash failure: {sid}')
+            return safetensors.torch.load_file(str(f))
+        return None
     manifest = root / 'manifest.json'
     if not manifest.is_file():
         return None
@@ -126,6 +137,7 @@ def prepare(args):
     backend.set_trainable_branch(None)
     backend.transformer.eval()
     backend.vae.eval()
+    reused_verified = False
     for position, sid in enumerate(remaining, 1):
         gc.collect()
         torch.cuda.empty_cache()
@@ -135,6 +147,16 @@ def prepare(args):
         w, h = records[sid]['target_size']
         gh, gw = h // 16, w // 16
         old = old_reference(args.reuse_root, sid, hashes[sid])
+        if old is not None and not reused_verified:
+            fresh_gt = capture(backend, images['gt'], MID)
+            errors = {str(l): float((fresh_gt[l][0].float() - old[f'q{l}_gt'].float()).norm()
+                                   / fresh_gt[l][0].float().norm().clamp_min(1e-12)) for l in MID}
+            if max(errors.values()) > 1e-4:
+                raise RuntimeError(f'Legacy/fresh teacher disagreement: {sid}: {errors}')
+            print(json.dumps({'event': 'legacy_teacher_verified', 'sample': sid,
+                              'relative_errors': errors}), flush=True)
+            reused_verified = True
+            del fresh_gt
         qi = capture(backend, images['input'], MID if old is not None else EARLY + MID + LATE)
         if old is None:
             qg = capture(backend, images['gt'], EARLY + MID + LATE)
@@ -169,7 +191,8 @@ def prepare(args):
         row = {'id': sid, 'cache': str(f.relative_to(args.output)), 'cache_bytes': f.stat().st_size,
                'cache_sha256': sha256(f), 'source_sha256': hashes[sid], 'rule_sha256': RULE_SHA,
                'image_size_wh': [w, h], 'token_grid_hw': [gh, gw],
-               'reused_original_m4': old is not None, 'negative': diagnostic,
+               'reused_original_m4': old is not None, 'reuse_root': str(args.reuse_root) if old is not None else None,
+               'negative': diagnostic,
                'late_statistics': late_statistics,
                'peak_allocated_gib': torch.cuda.max_memory_allocated(device) / 2**30,
                'completed_at_utc': datetime.now(timezone.utc).isoformat()}
@@ -188,6 +211,24 @@ def prepare(args):
 
 def finalize(args):
     dataset, records, splits = load_dataset(args.data_root)
+    # A rejected scientific precondition needs no second multi-GB checksum scan.
+    # Successful caches still undergo the complete file/source validation below.
+    quick = []
+    for sid in splits['train']:
+        path = args.output / 'records' / f'{sid}.json'
+        if not path.is_file():
+            break
+        row = json.loads(path.read_text())
+        if row.get('id') != sid or row.get('rule_sha256') != RULE_SHA:
+            break
+        quick.append(row)
+    if len(quick) == len(splits['train']) and not any(r['negative']['active'] for r in quick):
+        atomic_json(args.output / 'rejected_preflight.json', {
+            'cache_version': VERSION, 'rule_sha256': RULE_SHA, 'sample_count': len(quick),
+            'negative_active_samples': 0, 'training_allowed': False,
+            'all_sample_records_written': True, 'final_checksum_scan_complete': False,
+            'reason': 'No sample passed the new directional-supervision reliability condition'})
+        raise RuntimeError('No usable directional supervision; cache preflight rejected before redundant checksum scan')
     hashes = audit_sources(args.data_root, records, splits['train'])
     rows = []
     for sid in splits['train']:

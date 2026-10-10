@@ -21,14 +21,19 @@ def build_directions(q_i, q_gt, q_p90, gate, valid):
         np_, ng = delta_p.norm(dim=-1), delta_gt.norm(dim=-1)
         u = F.normalize(delta_p, dim=-1, eps=1e-6)
         cosine = (u * F.normalize(delta_gt, dim=-1, eps=1e-6)).sum(-1)
-        good = vi & vy & vp & (np_ >= RULE['min_norm']) & (ng >= RULE['min_norm']) & valid & (cosine > RULE['align_low'])
+        calibrated = RULE.get('direction_mode') == 'gt-calibrated'
+        reliability = cosine.abs() if calibrated else cosine
+        if calibrated:
+            u = u * torch.where(cosine >= 0, 1.0, -1.0)[:, None]
+        good = vi & vy & vp & (np_ >= RULE['min_norm']) & (ng >= RULE['min_norm']) & valid & (reliability > RULE['align_low'])
         layer_valid.append(good)
-        confidence[l] = ((cosine - RULE['align_low']) / RULE['align_width']).clamp(0, 1)
+        confidence[l] = ((reliability - RULE['align_low']) / RULE['align_width']).clamp(0, 1)
         directions[l] = u
         diagnostics[str(l)] = {'alignment_mean': float(cosine.mean()),
                                'norm_i_p90_mean': float(np_.mean()),
                                'norm_i_gt_mean': float(ng.mean()),
-                               'valid_fraction': float(good.float().mean())}
+                               'valid_fraction': float(good.float().mean()),
+                               'negative_alignment_fraction': float((cosine < 0).float().mean())}
     quorum = torch.stack(layer_valid).sum(0) >= RULE['min_layers']
     masks = {l: gate.float() * confidence[l] * quorum * layer_valid[j]
              for j, l in enumerate(MID)}
