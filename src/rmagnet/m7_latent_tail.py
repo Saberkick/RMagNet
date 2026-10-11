@@ -215,7 +215,13 @@ def cache_sample(a,sid,device):
         if bool(c.pop(f'rope_complex_{k}')):c[f'rope_{k}']=torch.view_as_complex(c[f'rope_{k}'].contiguous())
     return c,read(a.data/'blended'/f'{sid}.png').to(device),read(a.data/'transmission_layer'/f'{sid}.png').to(device)
 
-def decode(vae,z):return ((load_upstream().decode(z.to(vae.dtype),vae).float()+1)*.5)
+def decode(vae,z):
+    value=z.to(vae.dtype)
+    def run(v):return load_upstream().decode(v,vae)
+    # This pinned VAE does not expose enable_gradient_checkpointing().
+    # Checkpoint the frozen decoder call while preserving gradients to latent.
+    decoded=checkpoint(run,value,use_reentrant=False) if torch.is_grad_enabled() and value.requires_grad else run(value)
+    return (decoded.float()+1)*.5
 
 def charbonnier(x,y):return ((x-y).square()+1e-6).sqrt().mean()
 
@@ -278,7 +284,6 @@ def train(a):
     if manifest['tail_sha256']!=sha(a.cache/'frozen_tail.safetensors'):raise RuntimeError('Tail file changed')
     if any(not valid_sample(a,s,ident) for s in splits['train']+splits['validation']):raise RuntimeError('Broken cache')
     base,_=check_snapshots();vae=load_upstream().load_qwen_vae(str(base),device).eval().requires_grad_(False)
-    vae.enable_gradient_checkpointing()
     model=TailRestorer(a.cache/'frozen_tail.safetensors',a.rank).to(device)
     params=[p for p in model.parameters() if p.requires_grad]
     if any(p.requires_grad for p in vae.parameters()):raise RuntimeError('VAE not frozen')

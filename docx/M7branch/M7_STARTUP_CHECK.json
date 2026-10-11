@@ -1,0 +1,31 @@
+{
+  "checked_utc": "2026-10-11T14:45:32.014962+00:00",
+  "observed_updates": 96,
+  "observed_cursor": {
+    "epoch": 2,
+    "batch": 28,
+    "step": 96
+  },
+  "saved_latest_cursor": {
+    "epoch": 2,
+    "batch": 22,
+    "step": 90
+  },
+  "world_size": 3,
+  "gpu_selection": "1,2,3",
+  "trainable_parameters": 4062464,
+  "new_lora_gradient_step3": 3.233703296245949e-07,
+  "max_observed_rank0_peak_gib": 6.013659477233887,
+  "frozen_no_grad": true,
+  "initial_latent_parity": true,
+  "baseline_means": {
+    "l1": 0.04558181002736092,
+    "psnr": 24.05772689819336,
+    "ssim": 0.8759240174293518,
+    "edge_l1": 0.011004496347159148,
+    "low_change_keep_l1": 0.02929812591522932,
+    "high_change_restore_l1": 0.07354919880628585
+  },
+  "cache_complete": true,
+  "sealed_test_evaluated": false
+}
