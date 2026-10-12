@@ -162,3 +162,7 @@ RESUME=1 EPOCHS=10 CUDA_VISIBLE_DEVICES=1,2,3 \
 ## 官方前向一致性
 
 正式版本直接调用官方完整transformer forward，在选定block内部增加门控；未重新编写完整DiT前向。固定时间步按官方顺序先构造BF16的499，再除1000；VAE编码保持官方的autocast边界。首轮调试发现上述数值边界差异，已删除旧3步探针产物，最终训练从全新门控开始。训练前对启用/关闭门控后的latent进行逐值相等检查。
+
+## 当前留存状态（2026-10-12）
+
+已按用户要求保留测试整体指标更好的latest（epoch5），删除best、optimizer状态及可再生成的图像副产物。指标与曲线归档保留；本轮清理前的精确续训示例现已不可用。当前eval_m8_sealed.sh支持只测保留的latest与M4。诊断和下一轮未实施建议见M8_GATE_DIAGNOSIS_AND_RETENTION.md。

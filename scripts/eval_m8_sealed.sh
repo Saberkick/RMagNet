@@ -19,10 +19,12 @@ for gpu in "${cards[@]}"; do
   (( free>=18000 )) || { echo "GPU $gpu has insufficient free memory"; exit 3; }
 done
 RUN="$PROJECT/runs/m8_m4_gates_14_37_54_e5"
-OUTPUT="${OUTPUT:-$RUN/sealed_test_best_latest}"
+OUTPUT="${OUTPUT:-$RUN/sealed_test_retained_latest}"
+optional=()
+[[ ! -f "$RUN/best/gates.safetensors" ]] || optional+=(--best "$RUN/best/gates.safetensors")
 cd "$PROJECT"
 /home/xuke/.local/bin/uv run --no-project --python "$ROOT/envs/windowseat-py312/bin/python" \
   python -m src.rmagnet.m8_sealed_eval \
   --data "$ROOT/datasets/rmagnet_sma_dataset3" \
   --initial "$ROOT/RMagNet/runs/m4_best_newcache_e20_p4/best_transmission_lora.safetensors" \
-  --best "$RUN/best/gates.safetensors" --latest "$RUN/latest/gates.safetensors" --output "$OUTPUT"
+  --latest "$RUN/latest/gates.safetensors" "${optional[@]}" --output "$OUTPUT"

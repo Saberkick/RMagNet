@@ -195,6 +195,7 @@ def main():
     _,records,splits=load_manifest(a.data)
     ident={'version':VERSION,'m4_sha256':EXPECTED_M4,'dataset_sha256':sha(a.data/'manifest.json'),'layers':list(LAYERS)}
     if (a.output/'config.json').exists() and not a.resume:raise FileExistsError('Use --resume or a new output')
+    if a.resume and not (a.output/'latest/trainer.pt').is_file():raise RuntimeError('M8 was pruned to inference-only; exact optimizer-state resume is unavailable.')
     a.output.mkdir(parents=True,exist_ok=True)
     signal.signal(signal.SIGINT,stop_request);signal.signal(signal.SIGTERM,stop_request)
     torch.cuda.set_device(0);runner=FrozenM4Gates(a.initial,cards)

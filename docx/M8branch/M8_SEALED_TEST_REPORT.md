@@ -16,3 +16,7 @@ M4、best、latest在同一模型/同次任务下生成；模型输出保存成R
 所有模型均保留24张PNG、逐图metrics.csv；best/latest还记录门控统计和固定前三张灰度门控图。
 运行目录：`/share/linmingheng-local/xuke/RMagNet-M8/runs/m8_m4_gates_14_37_54_e5/sealed_test_best_latest`。预测位于`m4/predictions/`、`best/predictions/`、`latest/predictions/`；身份与哈希见config.json。
 本轮未根据封存测试结果更换checkpoint，未运行real20。
+
+## 清理后留存（2026-10-12）
+
+按用户要求，best权重与预测、所有门控PNG及optimizer状态已清理；latest门控推理权重、M4/latest各24张测试预测仍保留。所有模型的数值指标与训练曲线归档保留，原表为历史完整评测结果。诊断及清理清单见M8_GATE_DIAGNOSIS_AND_RETENTION.md与M8_RETENTION_AUDIT.json。

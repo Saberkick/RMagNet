@@ -12,7 +12,8 @@ from .sma_data import load_manifest
 @torch.no_grad()
 def main():
     p=argparse.ArgumentParser()
-    for k in ('data','initial','best','latest','output'):p.add_argument('--'+k,type=Path,required=True)
+    for k in ('data','initial','latest','output'):p.add_argument('--'+k,type=Path,required=True)
+    p.add_argument('--best',type=Path)
     a=p.parse_args();torch.set_num_threads(1);torch.manual_seed(2026);torch.cuda.set_device(0)
     cards=torch.cuda.device_count()
     if cards not in (2,3,4):raise RuntimeError('Use 2-4 model-parallel GPUs')
@@ -21,7 +22,9 @@ def main():
     _,records,splits=load_manifest(a.data);ids=splits['test']
     ident={'version':VERSION,'m4_sha256':EXPECTED_M4,'dataset_sha256':sha(a.data/'manifest.json'),'layers':list(LAYERS)}
     states={};checkpoint_info={}
-    for label,path,expected_epoch in [('best',a.best,2),('latest',a.latest,5)]:
+    selected=[('latest',a.latest,5)]
+    if a.best is not None:selected.insert(0,('best',a.best,2))
+    for label,path,expected_epoch in selected:
         with safe_open(path,framework='pt') as f:md=f.metadata()
         if json.loads(md['identity'])!=ident:raise RuntimeError('Checkpoint identity mismatch '+label)
         cursor=json.loads(md['cursor'])
@@ -36,7 +39,7 @@ def main():
         'M4_baseline':'fresh same-model forward with all spatial gates disabled','training':False})
     runner=FrozenM4Gates(a.initial,cards);runner.gates.requires_grad_(False).eval()
     if any(p.requires_grad for p in runner.backend.parameters()):raise RuntimeError('Frozen model changed')
-    versions=[('m4','M4 final best'),('best','M8 best, epoch2'),('latest','M8 latest, epoch5')]
+    versions=[('m4','M4 final best')]+([('best','M8 best, epoch2')] if a.best else [])+[('latest','M8 latest, epoch5')]
     rows={key:[] for key,_ in versions};started=time.monotonic()
     for n,sid in enumerate(ids,1):
         image=read(a.data/'blended'/f'{sid}.png').to(runner.primary)
@@ -74,10 +77,11 @@ def main():
              'checkpoint_info':checkpoint_info,'elapsed_seconds':time.monotonic()-started,'training':False}
     atomic_json(a.output/'summary.json',summary)
     table='\n'.join(f"| {r['model']} | {r['count']} | {r['means']['psnr']:.4f} | {r['means']['ssim']:.6f} | {r['means']['l1']:.6f} | {r['means']['edge_l1']:.6f} |" for r in reports.values())
-    comparison='\n'.join(f"- {reports[k]['model']}：PSNR {reports[k]['minus_m4']['psnr']:+.4f} dB、SSIM {reports[k]['minus_m4']['ssim']:+.6f}；逐图PSNR胜出 {reports[k]['wins']['psnr']}/{len(ids)}，SSIM胜出 {reports[k]['wins']['ssim']}/{len(ids)}。" for k in ('best','latest'))
+    comparison='\n'.join(f"- {reports[k]['model']}：PSNR {reports[k]['minus_m4']['psnr']:+.4f} dB、SSIM {reports[k]['minus_m4']['ssim']:+.6f}；逐图PSNR胜出 {reports[k]['wins']['psnr']}/{len(ids)}，SSIM胜出 {reports[k]['wins']['ssim']}/{len(ids)}。" for k in ('best','latest') if k in reports)
+    retained_note='best已退役，本轮只测保留的latest与M4。' if a.best is None else 'best由验证集选定为epoch2，latest为epoch5。'
     (a.output/'REPORT.md').write_text(f'''# M8 best/latest 封存测试
 
-同一组{len(ids)}张纠正标签后的封存图。best由验证集L1选定为epoch2，latest为epoch5；均在读取本轮封存结果前固定。
+同一组{len(ids)}张纠正标签后的封存图。{retained_note} 权重均在本轮读取封存结果前固定。
 输入仅普通I，保留现有动态尺寸；GT只用于评价。冻结M4、NF4主干、BF16激活、FP32门控；无训练、无教师缓存。
 M4、best、latest在同一模型/同次任务下生成；模型输出保存成RGB8 PNG后统一计算逐图宏平均。SSIM为项目uniform11×11、zero-pad5。
 
