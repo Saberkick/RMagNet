@@ -119,7 +119,8 @@ class FrozenM4Gates:
             text=b.embeddings['prompt_embeds'].to(self.primary,dtype=torch.bfloat16)
             mask=b.embeddings['prompt_mask'].to(self.primary)
             text=t.txt_in(t.txt_norm(text))
-            timestep=torch.full((1,),499/1000,device=self.primary,dtype=torch.bfloat16)
+            # Match upstream operation order: BF16(499) / 1000, not BF16(.499).
+            timestep=torch.full((1,),float(499),device=self.primary,dtype=torch.bfloat16)/1000
             temb=t.time_text_embed(timestep,x)
             rope=t.pos_embed([[(1,*self.grid)]],mask.sum(1).tolist(),device=self.primary)
         for i,block in enumerate(t.transformer_blocks):
@@ -139,6 +140,22 @@ class FrozenM4Gates:
             edited=z-v
             pred=decode(b.vae,edited)
         return pred,edited
+
+    @torch.no_grad()
+    def native_latent(self,image):
+        """Reference whole-transformer forward, only relocate its final output."""
+        b=self.backend;t=b.transformer;image=image.to(self.primary);h,w=image.shape[-2:]
+        z=deterministic_encode(b,image*2-1)
+        packed=b.upstream.QwenImageEditPipeline._pack_latents(z[:,:,0],1,16,h//8,w//8).to(torch.bfloat16)
+        prompt=b.embeddings['prompt_embeds'].to(self.primary,dtype=torch.bfloat16)
+        mask=b.embeddings['prompt_mask'].to(self.primary)
+        ts=torch.full((1,),float(499),device=self.primary,dtype=torch.bfloat16)/1000
+        with torch.autocast('cuda',dtype=torch.bfloat16):
+            out=t(hidden_states=packed,timestep=ts,encoder_hidden_states=prompt,
+                encoder_hidden_states_mask=mask,img_shapes=[[(1,h//16,w//16)]],
+                txt_seq_lens=mask.sum(1).tolist(),guidance=None,attention_kwargs={},return_dict=False)[0].to(self.primary)
+            velocity=b.upstream.QwenImageEditPipeline._unpack_latents(out,height=h,width=w,vae_scale_factor=8)
+        return z-velocity
 
     def regularizer(self):
         values=[(g.last-1).square().mean().to(self.primary) for g in self.gates.values()]
@@ -245,15 +262,17 @@ def main():
         sid=max(splits['train'],key=lambda s:math.prod(records[s]['target_size']))
         image,_=pixels(a,sid,runner.primary)
         with torch.no_grad():
-            runner.enabled=False;_,z0=runner.forward(image)
+            runner.enabled=False;z_native=runner.native_latent(image);_,z0=runner.forward(image)
+            native_error=float((z_native-z0).abs().max())
+            if native_error!=0:raise RuntimeError('Manual model-parallel forward differs from native M4: '+str(native_error))
             runner.enabled=True;_,z1=runner.forward(image)
             error=float((z0-z1).abs().max())
             if error!=0:raise RuntimeError('Zero gates do not preserve native M4: '+str(error))
             stats=runner.stats()
             if any(v['min']!=1 or v['max']!=1 for v in stats.values()):raise RuntimeError('Bad gate initialization')
-        runner.clear();del image,z0,z1
-        atomic_json(a.output/'identity_check.json',{'id':sid,'max_latent_error':error,'gates':stats})
-        emit({'phase':'identity_pass','id':sid,'max_latent_error':error})
+        runner.clear();del image,z_native,z0,z1
+        atomic_json(a.output/'identity_check.json',{'id':sid,'max_latent_error':error,'native_forward_max_latent_error':native_error,'gates':stats})
+        emit({'phase':'identity_pass','id':sid,'max_latent_error':error,'native_forward_max_latent_error':native_error})
         runner.enabled=False;baseline=evaluate(a,runner,splits['validation'],a.output/'m4_baseline_validation')
         runner.enabled=True;best=baseline['means']['l1'];save('best');save('latest')
         atomic_json(a.output/'best_metrics.json',{'cursor':dict(cursor),**baseline})
