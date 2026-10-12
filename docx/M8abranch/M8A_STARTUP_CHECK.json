@@ -1,0 +1,186 @@
+{
+  "recorded_at": "2026-10-12T05:49:48.826689+00:00",
+  "run": "/share/linmingheng-local/xuke/RMagNet-M8a/runs/m8a_m4_late_strong_gates_e2",
+  "tmux": "m8a-late-strong-gates",
+  "budget_epochs": 2,
+  "budget_updates": 68,
+  "last_observed": {
+    "cursor": {
+      "epoch": 0,
+      "batch": 23,
+      "step": 23
+    },
+    "ids": [
+      "133_5340_4158",
+      "95_3117_1319",
+      "276_2271_1147",
+      "236_1772_2042",
+      "41_3083_1577",
+      "228_2165_2143"
+    ],
+    "loss": {
+      "rec": 0.045186582487076514,
+      "edge": 0.010328659477333229,
+      "gate_regularizer": 2.4942657243324597e-05,
+      "total": 0.04621969830865662
+    },
+    "gradient_norm": 0.010810705833137035,
+    "layer_gradient_norms": {
+      "54": 0.0046406439772630394,
+      "58": 0.009764004709043365
+    },
+    "kappa": 3.0,
+    "gate_stats_last_sample": {
+      "54": {
+        "min": 0.99405837059021,
+        "max": 1.0034552812576294,
+        "mean": 0.9990501999855042,
+        "mean_abs_change": 0.0038941483944654465,
+        "spatial_std": 0.00390266883186996,
+        "near_bound_fraction": 0.0,
+        "kappa": 3.0,
+        "branches": {
+          "attention": {
+            "min": 1.002319574356079,
+            "max": 1.0034552812576294,
+            "mean": 1.0029443502426147,
+            "spatial_std": 0.00018183508655056357,
+            "mean_abs_change": 0.002944312524050474
+          },
+          "mlp": {
+            "min": 0.99405837059021,
+            "max": 0.9960307478904724,
+            "mean": 0.9951560497283936,
+            "spatial_std": 0.00028103633667342365,
+            "mean_abs_change": 0.0048439837992191315
+          }
+        }
+      },
+      "58": {
+        "min": 0.9905615448951721,
+        "max": 1.000235676765442,
+        "mean": 0.9957603216171265,
+        "mean_abs_change": 0.0042423647828400135,
+        "spatial_std": 0.00405928073450923,
+        "near_bound_fraction": 0.0,
+        "kappa": 3.0,
+        "branches": {
+          "attention": {
+            "min": 0.9995610117912292,
+            "max": 1.000235676765442,
+            "mean": 0.9998066425323486,
+            "spatial_std": 9.927560313371941e-05,
+            "mean_abs_change": 0.00019878633611369878
+          },
+          "mlp": {
+            "min": 0.9905615448951721,
+            "max": 0.9933106899261475,
+            "mean": 0.9917140007019043,
+            "spatial_std": 0.0004222229472361505,
+            "mean_abs_change": 0.008285942487418652
+          }
+        }
+      }
+    },
+    "frozen_no_grad": true,
+    "peak_gib_by_device": {
+      "0": 9.340239524841309,
+      "1": 4.843430519104004,
+      "2": 5.085613250732422
+    },
+    "lr": 8.929729248074364e-05,
+    "elapsed_seconds": 679.6866504258942
+  },
+  "baseline": {
+    "l1": 0.045581167191267015,
+    "psnr": 24.057811660766603,
+    "ssim": 0.8759249877929688,
+    "edge_l1": 0.011004017051309347,
+    "low_change_keep_l1": 0.029296127557754518,
+    "high_change_restore_l1": 0.07354910165071488
+  },
+  "identity_check": {
+    "id": "130_5411_2729",
+    "max_latent_error": 0.0,
+    "kappa4_max_latent_error": 0.0,
+    "native_forward_max_latent_error": 0.0,
+    "gates": {
+      "54": {
+        "min": 1.0,
+        "max": 1.0,
+        "mean": 0.9999999403953552,
+        "mean_abs_change": 0.0,
+        "spatial_std": 0.0,
+        "near_bound_fraction": 0.0,
+        "kappa": 1.0,
+        "branches": {
+          "attention": {
+            "min": 1.0,
+            "max": 1.0,
+            "mean": 0.9999999403953552,
+            "spatial_std": 0.0,
+            "mean_abs_change": 0.0
+          },
+          "mlp": {
+            "min": 1.0,
+            "max": 1.0,
+            "mean": 0.9999999403953552,
+            "spatial_std": 0.0,
+            "mean_abs_change": 0.0
+          }
+        }
+      },
+      "58": {
+        "min": 1.0,
+        "max": 1.0,
+        "mean": 0.9999999403953552,
+        "mean_abs_change": 0.0,
+        "spatial_std": 0.0,
+        "near_bound_fraction": 0.0,
+        "kappa": 1.0,
+        "branches": {
+          "attention": {
+            "min": 1.0,
+            "max": 1.0,
+            "mean": 0.9999999403953552,
+            "spatial_std": 0.0,
+            "mean_abs_change": 0.0
+          },
+          "mlp": {
+            "min": 1.0,
+            "max": 1.0,
+            "mean": 0.9999999403953552,
+            "spatial_std": 0.0,
+            "mean_abs_change": 0.0
+          }
+        }
+      }
+    }
+  },
+  "latest_state": {
+    "cursor": {
+      "epoch": 0,
+      "batch": 20,
+      "step": 20
+    },
+    "best_epoch": 0,
+    "best_l1": 0.045581167191267015,
+    "identity": {
+      "version": "m8a-frozen-m4-late-gates-54-58-kappa-ramp-v1",
+      "m4_sha256": "897282b1bb9cfe61f96530df72edcf8a44a066bb819a3663e9100862aefdb2a3",
+      "dataset_sha256": "bb211d1de9d399c685d70e80ef292d9a86b9e6733fb78cf1c1724d0d591bb77c",
+      "layers": [
+        54,
+        58
+      ],
+      "gate_range": [
+        0,
+        2
+      ],
+      "kappa_ramp": "1 to 4 over first epoch"
+    },
+    "kappa": 2.7272727272727275
+  },
+  "status": "background training; not final result",
+  "sealed_test_run": false
+}
