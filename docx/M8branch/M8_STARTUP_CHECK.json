@@ -1,0 +1,69 @@
+{
+  "client_date": "2026-10-12",
+  "checked_utc": "2026-10-12T01:32:50.702417+00:00",
+  "observed_steps": 4,
+  "latest_saved_cursor": {
+    "epoch": 0,
+    "batch": 4,
+    "step": 4
+  },
+  "physical_gpus": "1,2,3",
+  "model_parallel": true,
+  "trainable_parameters": 610758,
+  "native_parity": {
+    "id": "130_5411_2729",
+    "max_latent_error": 0.0,
+    "native_forward_max_latent_error": 0.0,
+    "gates": {
+      "14": {
+        "min": 1.0,
+        "max": 1.0,
+        "mean": 0.9999999403953552,
+        "mean_abs_change": 0.0,
+        "spatial_std": 0.0,
+        "near_bound_fraction": 0.0
+      },
+      "37": {
+        "min": 1.0,
+        "max": 1.0,
+        "mean": 0.9999999403953552,
+        "mean_abs_change": 0.0,
+        "spatial_std": 0.0,
+        "near_bound_fraction": 0.0
+      },
+      "54": {
+        "min": 1.0,
+        "max": 1.0,
+        "mean": 0.9999999403953552,
+        "mean_abs_change": 0.0,
+        "spatial_std": 0.0,
+        "near_bound_fraction": 0.0
+      }
+    }
+  },
+  "layer_gradient_norms_last": {
+    "14": 0.00048735762339414403,
+    "37": 0.0013532061077393244,
+    "54": 0.00029655213064278815
+  },
+  "peak_gib_logical": {
+    "0": 9.343053817749023,
+    "1": 5.2247161865234375,
+    "2": 5.236752986907959
+  },
+  "output_nonzero_weights": {
+    "14": 128,
+    "37": 128,
+    "54": 128
+  },
+  "no_original_parameter_gradients": true,
+  "test_evaluated": false,
+  "baseline": {
+    "l1": 0.045581167191267015,
+    "psnr": 24.057811660766603,
+    "ssim": 0.8759249877929688,
+    "edge_l1": 0.011004017051309347,
+    "low_change_keep_l1": 0.029296127557754518,
+    "high_change_restore_l1": 0.07354910165071488
+  }
+}
