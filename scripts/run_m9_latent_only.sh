@@ -24,6 +24,7 @@ done
 cd "$PROJECT"
 RUN="$PROJECT/runs/$RUN_NAME";mkdir -p "$RUN/logs"
 exec 9>"$PROJECT/runs/m9_pipeline.lock";flock -n 9 || exit 5
+rm -f -- "$RUN/pipeline.exit_code"
 printf '%s\n' "$$" > "$RUN/pipeline.pid"
 trap 'rc=$?; printf "%s\n" "$rc" > "$RUN/pipeline.exit_code"' EXIT
 available="$(df --output=avail -B1 "$PROJECT" | tail -1 | tr -d ' ')"
