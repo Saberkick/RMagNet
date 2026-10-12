@@ -1,0 +1,121 @@
+{
+  "complete": true,
+  "count": 24,
+  "protocol": {
+    "model": "Official WindowSeat; no personal training",
+    "qwen_snapshot": "/share/linmingheng-local/xuke/.cache/huggingface/hub/models--Qwen--Qwen-Image-Edit-2509/snapshots/d3968ef930e841f4c73640fb8afa3b306a78167e",
+    "windowseat_snapshot": "/share/linmingheng-local/xuke/.cache/huggingface/hub/models--huawei-bayerlab--windowseat-reflection-removal-v1-0/snapshots/c1f59ca02bff68535c976e5e17147b3d9323309e",
+    "official_lora_sha256": "2f04225c5be1cac69a5d76faf4c95515d5503210cfee73c0bb1e79309f5a74e9",
+    "dataset_manifest_sha256": "bb211d1de9d399c685d70e80ef292d9a86b9e6733fb78cf1c1724d0d591bb77c",
+    "test_ids": [
+      "111_2924_1604",
+      "111_830_1325",
+      "141_3946_2327",
+      "153_3556_2410",
+      "170_1394_1302",
+      "170_2075_1342",
+      "170_2702_1435",
+      "17_2048_1554",
+      "188_405_1446",
+      "190_1833_1855",
+      "197_2230_1448",
+      "201_2159_2184",
+      "21_2140_824",
+      "244_1850_759",
+      "244_1924_1298",
+      "244_1981_1799",
+      "244_2576_1372",
+      "247_1402_584",
+      "247_1447_1313",
+      "256_1008_906",
+      "43_3705_2170",
+      "55_1672_1162",
+      "77_1933_1814",
+      "94_1826_1832"
+    ],
+    "count": 24,
+    "input": "I only; GT/P90/DoLP not supplied to model",
+    "physical_gpus": "4",
+    "dtype": "NF4 backbone, BF16 activations/VAE, FP32 official LoRA",
+    "protocol": "same native full forward as M4/M9; BF16(499)/1000; final zI-velocity",
+    "encoder": "deterministic posterior mode with fixed latent mean/std",
+    "geometry": "existing processed dynamic sizes, no resize/crop/padding/tiling",
+    "metrics": "saved RGB8 PNG; RGB PSNR range1; project uniform11x11 SSIM zero-pad5; macro means",
+    "training": false,
+    "claim": "official weights under unified protocol, not official CLI tiling/stochastic replication"
+  },
+  "comparisons": {
+    "WindowSeat official": {
+      "means": {
+        "l1": 0.06524569840015222,
+        "psnr": 24.342490315437317,
+        "ssim": 0.7866630728046099,
+        "edge_l1": 0.012321277579758316,
+        "low_change_keep_l1": 0.031281419175987445,
+        "high_change_restore_l1": 0.11603865077874313
+      },
+      "delta": {
+        "l1": 0,
+        "psnr": 0,
+        "ssim": 0,
+        "edge_l1": 0,
+        "low_change_keep_l1": 0,
+        "high_change_restore_l1": 0
+      }
+    },
+    "M4 final best": {
+      "means": {
+        "l1": 0.06047010545929273,
+        "psnr": 24.89938410123189,
+        "ssim": 0.8012831173837185,
+        "edge_l1": 0.01171980039604629,
+        "low_change_keep_l1": 0.028603489025651168,
+        "high_change_restore_l1": 0.10220910915328811
+      },
+      "delta": {
+        "l1": -0.00477559294085949,
+        "psnr": 0.5568937857945748,
+        "ssim": 0.014620044579108593,
+        "edge_l1": -0.0006014771837120261,
+        "low_change_keep_l1": -0.0026779301503362767,
+        "high_change_restore_l1": -0.013829541625455022
+      }
+    },
+    "M9 best (M4 initialization)": {
+      "means": {
+        "l1": 0.06047010545929273,
+        "psnr": 24.89938410123189,
+        "ssim": 0.8012831173837185,
+        "edge_l1": 0.01171980039604629,
+        "low_change_keep_l1": 0.028603489025651168,
+        "high_change_restore_l1": 0.10220910915328811
+      },
+      "delta": {
+        "l1": -0.00477559294085949,
+        "psnr": 0.5568937857945748,
+        "ssim": 0.014620044579108593,
+        "edge_l1": -0.0006014771837120261,
+        "low_change_keep_l1": -0.0026779301503362767,
+        "high_change_restore_l1": -0.013829541625455022
+      }
+    },
+    "M9 latest epoch4": {
+      "means": {
+        "l1": 0.061148063628934324,
+        "psnr": 24.781031250953674,
+        "ssim": 0.794731551160415,
+        "edge_l1": 0.012830674202026179,
+        "low_change_keep_l1": 0.02946824673563242,
+        "high_change_restore_l1": 0.10157725975538294
+      },
+      "delta": {
+        "l1": -0.004097634771217898,
+        "psnr": 0.4385409355163574,
+        "ssim": 0.008068478355805153,
+        "edge_l1": 0.0005093966222678627,
+        "low_change_keep_l1": -0.001813172440355025,
+        "high_change_restore_l1": -0.014461391023360193
+      }
+    }
+  }
+}
