@@ -50,7 +50,7 @@ $$
 
 冻结权重不等于关闭梯度：第14层之后需要允许梯度通过冻结DiT传回门控，Decoder也需允许对输入latent求导。
 
-- VAE编码、输入投影与前13个block在 `no_grad` 下执行。
+- VAE编码显式在 `no_grad` 下、且在transformer autocast之外执行。输入投影与前13个block的参数及输入均无需梯度，自动不构建梯度图。
 - 第14至60个block使用non-reentrant gradient checkpointing。
 - Decoder使用M7已验证的函数级checkpoint；不调用当前版本不支持的VAE内置接口。
 - 原DiT、原LoRA及VAE的参数必须全部 `requires_grad=False`，每更新检查无梯度。
@@ -158,3 +158,7 @@ RESUME=1 EPOCHS=10 CUDA_VISIBLE_DEVICES=1,2,3 \
 首先验收初始化等价、三层门控非零梯度、参数变化、冻结参数无梯度、有限loss、显存正常和latest保存。随后看验证集是否同时改善整体与局部指标；若门控接近常数1，要区分真实无需修改、信号弱或训练不足。若长期触及范围边界，也不立即放宽，应先判断是否在破坏原M4结果。
 
 只有验证集结果明确后再授权封存测试。本实验不保证恢复VAE已丢失或原图不可见的真实纹理，也不将门控可视化自动解释成物体语义识别。
+
+## 官方前向一致性
+
+正式版本直接调用官方完整transformer forward，在选定block内部增加门控；未重新编写完整DiT前向。固定时间步按官方顺序先构造BF16的499，再除1000；VAE编码保持官方的autocast边界。首轮调试发现上述数值边界差异，已删除旧3步探针产物，最终训练从全新门控开始。训练前对启用/关闭门控后的latent进行逐值相等检查。

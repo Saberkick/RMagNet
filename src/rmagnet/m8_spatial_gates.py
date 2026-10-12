@@ -91,6 +91,7 @@ class FrozenM4Gates:
         self.backend.set_trainable_branch('transmission');load_initial(self.backend,initial,self.primary)
         self.backend.set_trainable_branch(None);self.backend.eval()
         if any(p.requires_grad for p in self.backend.parameters()):raise RuntimeError('M4/VAE must be frozen')
+        transformer.enable_gradient_checkpointing()
         self.mapping=mapping;self.gates=nn.ModuleDict()
         for layer in LAYERS:
             block=transformer.transformer_blocks[layer-1]
@@ -110,42 +111,17 @@ class FrozenM4Gates:
         for gate in self.gates.values():gate.last=None
 
     def forward(self,image):
-        self.clear();b=self.backend;t=b.transformer
-        image=image.to(self.primary);height,width=image.shape[-2:];self.grid=(height//16,width//16)
-        with torch.no_grad(),torch.autocast('cuda',dtype=torch.bfloat16):
-            z=deterministic_encode(b,image*2-1)
-            packed=b.upstream.QwenImageEditPipeline._pack_latents(z[:,:,0],1,16,height//8,width//8)
-            x=t.img_in(packed.to(torch.bfloat16))
-            text=b.embeddings['prompt_embeds'].to(self.primary,dtype=torch.bfloat16)
-            mask=b.embeddings['prompt_mask'].to(self.primary)
-            text=t.txt_in(t.txt_norm(text))
-            # Match upstream operation order: BF16(499) / 1000, not BF16(.499).
-            timestep=torch.full((1,),float(499),device=self.primary,dtype=torch.bfloat16)/1000
-            temb=t.time_text_embed(timestep,x)
-            rope=t.pos_embed([[(1,*self.grid)]],mask.sum(1).tolist(),device=self.primary)
-        for i,block in enumerate(t.transformer_blocks):
-            device=torch.device('cuda',self.mapping[f'transformer_blocks.{i}'])
-            x=x.to(device);text=text.to(device);m=mask.to(device);te=temb.to(device);r=tuple(v.to(device) for v in rope)
-            def call(h,tx,block=block,m=m,te=te,r=r):
-                return block(hidden_states=h,encoder_hidden_states=tx,encoder_hidden_states_mask=m,
-                    temb=te,image_rotary_emb=r,joint_attention_kwargs={})
-            with torch.autocast('cuda',dtype=torch.bfloat16):
-                if i<LAYERS[0]-1:
-                    with torch.no_grad():text,x=call(x,text)
-                elif torch.is_grad_enabled():text,x=checkpoint(call,x,text,use_reentrant=False)
-                else:text,x=call(x,text)
+        self.clear();image=image.to(self.primary)
+        self.grid=(image.shape[-2]//16,image.shape[-1]//16)
+        edited=self.native_latent(image)
         with torch.autocast('cuda',dtype=torch.bfloat16):
-            out=t.proj_out(t.norm_out(x,temb.to(x.device))).to(self.primary)
-            v=b.upstream.QwenImageEditPipeline._unpack_latents(out,height=height,width=width,vae_scale_factor=8)
-            edited=z-v
-            pred=decode(b.vae,edited)
+            pred=decode(self.backend.vae,edited)
         return pred,edited
 
-    @torch.no_grad()
     def native_latent(self,image):
-        """Reference whole-transformer forward, only relocate its final output."""
+        """Whole native transformer forward; frozen encoder outside autocast."""
         b=self.backend;t=b.transformer;image=image.to(self.primary);h,w=image.shape[-2:]
-        z=deterministic_encode(b,image*2-1)
+        with torch.no_grad():z=deterministic_encode(b,image*2-1)
         packed=b.upstream.QwenImageEditPipeline._pack_latents(z[:,:,0],1,16,h//8,w//8).to(torch.bfloat16)
         prompt=b.embeddings['prompt_embeds'].to(self.primary,dtype=torch.bfloat16)
         mask=b.embeddings['prompt_mask'].to(self.primary)
