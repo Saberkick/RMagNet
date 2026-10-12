@@ -55,7 +55,7 @@ best 按25张验证图平均 PSNR选择，初始化 M4 baseline 也参与候选�
 
 ```bash
 cd /share/linmingheng-local/xuke/RMagNet-M9
-CUDA_VISIBLE_DEVICES=4,5,6,7 OMP_NUM_THREADS=1 EPOCHS=4 bash scripts/run_m9_latent_only.sh
+CUDA_VISIBLE_DEVICES=0,1,6,7 OMP_NUM_THREADS=1 EPOCHS=4 bash scripts/run_m9_latent_only.sh
 ```
 
 后台使用 tmux。日志：`runs/m9_m4_latent_only_e4/logs/cache.log`、`logs/train.log`。最终退出码：`pipeline.exit_code`。

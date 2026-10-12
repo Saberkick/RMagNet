@@ -8,7 +8,7 @@ export HF_HOME="$ROOT/.cache/huggingface" HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=
 export UV_CACHE_DIR="$ROOT/.cache/uv" UV_OFFLINE=1 TMPDIR="$ROOT/tmp"
 export OMP_NUM_THREADS="${OMP_NUM_THREADS:-1}" PYTHONUNBUFFERED=1
 export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
-export CUDA_VISIBLE_DEVICES="${CUDA_VISIBLE_DEVICES:-4,5,6,7}"
+export CUDA_VISIBLE_DEVICES="${CUDA_VISIBLE_DEVICES:-0,1,6,7}"
 EPOCHS="${1:-${EPOCHS:-4}}"
 RUN_NAME="${RUN_NAME:-m9_m4_latent_only_e4}"
 [[ "$EPOCHS" =~ ^[1-9][0-9]*$ && "$RUN_NAME" =~ ^[a-zA-Z0-9_-]+$ ]] || exit 2
