@@ -1,0 +1,89 @@
+{
+  "complete": true,
+  "split": "sealed test",
+  "count": 24,
+  "checkpoint_info": {
+    "best": {
+      "path": "/share/linmingheng-local/xuke/RMagNet-M8/runs/m8_m4_gates_14_37_54_e5/best/gates.safetensors",
+      "sha256": "84c69ffd90b8d8ce38d12276f92582aa4891ac7b601f28a7980fff54aa32204b",
+      "cursor": {
+        "epoch": 2,
+        "batch": 0,
+        "step": 68
+      }
+    },
+    "latest": {
+      "path": "/share/linmingheng-local/xuke/RMagNet-M8/runs/m8_m4_gates_14_37_54_e5/latest/gates.safetensors",
+      "sha256": "9b4d458571fcb26ba39a9842069699fb1b11871167270a053086b840416cde25",
+      "cursor": {
+        "epoch": 5,
+        "batch": 0,
+        "step": 170
+      }
+    }
+  },
+  "elapsed_seconds": 293.0816037170589,
+  "training": false,
+  "models": {
+    "m4": {
+      "model": "M4 final best",
+      "count": 24,
+      "means": {
+        "l1": 0.06047010545929273,
+        "psnr": 24.89938410123189,
+        "ssim": 0.8012831173837185,
+        "edge_l1": 0.01171980039604629,
+        "low_change_keep_l1": 0.028603489025651168,
+        "high_change_restore_l1": 0.10220910915328811
+      }
+    },
+    "best": {
+      "model": "M8 best, epoch2",
+      "count": 24,
+      "means": {
+        "l1": 0.06052446896986415,
+        "psnr": 24.892634352048237,
+        "ssim": 0.8012447481354078,
+        "edge_l1": 0.011718728327347586,
+        "low_change_keep_l1": 0.028546814147072535,
+        "high_change_restore_l1": 0.1024342062495028
+      },
+      "minus_m4": {
+        "l1": 5.436351057142019e-05,
+        "psnr": -0.006749749183654785,
+        "ssim": -3.836924831068789e-05,
+        "edge_l1": -1.0720686987042427e-06,
+        "low_change_keep_l1": -5.667487857863307e-05,
+        "high_change_restore_l1": 0.00022509709621468255
+      },
+      "wins": {
+        "psnr": 11,
+        "ssim": 13
+      }
+    },
+    "latest": {
+      "model": "M8 latest, epoch5",
+      "count": 24,
+      "means": {
+        "l1": 0.060495618847198784,
+        "psnr": 24.8974605401357,
+        "ssim": 0.8014508572717508,
+        "edge_l1": 0.011714990871647993,
+        "low_change_keep_l1": 0.028568546384728204,
+        "high_change_restore_l1": 0.10218588216230273
+      },
+      "minus_m4": {
+        "l1": 2.5513387906052343e-05,
+        "psnr": -0.0019235610961914062,
+        "ssim": 0.00016773988803231443,
+        "edge_l1": -4.8095243982970715e-06,
+        "low_change_keep_l1": -3.494264092296362e-05,
+        "high_change_restore_l1": -2.3226990985378282e-05
+      },
+      "wins": {
+        "psnr": 11,
+        "ssim": 13
+      }
+    }
+  }
+}
