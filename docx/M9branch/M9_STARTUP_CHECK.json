@@ -1,0 +1,154 @@
+{
+  "status": "stable_background_launch",
+  "verified_updates": 3,
+  "physical_gpus": [
+    0,
+    1,
+    2,
+    3
+  ],
+  "baseline": {
+    "latent_l1": 0.17288357645273209,
+    "l1": 0.045581167191267015,
+    "psnr": 24.057811660766603,
+    "ssim": 0.8759249877929688,
+    "edge_l1": 0.011004017051309347,
+    "low_change_keep_l1": 0.029296127557754518,
+    "high_change_restore_l1": 0.07354910165071488
+  },
+  "cache_parity": {
+    "id": "130_5411_2729",
+    "input_max_error": 0,
+    "largest_train_geometry": [
+      544,
+      400
+    ]
+  },
+  "baseline_parity": {
+    "source": "/share/linmingheng-local/xuke/RMagNet-M8a/runs/m8a_m4_late_strong_gates_e2/m4_baseline_validation/metrics.json",
+    "max_metric_delta": 0.0
+  },
+  "startup_updates": [
+    {
+      "cursor": {
+        "epoch": 0,
+        "batch": 1,
+        "step": 1
+      },
+      "ids": [
+        "130_5411_2729",
+        "93_2622_768",
+        "109_2042_1979",
+        "124_6084_2457",
+        "56_2698_1114",
+        "147_5210_2339"
+      ],
+      "latent_l1": 0.14084050556023917,
+      "gradient_norm": 1.1045384407043457,
+      "gradient_norm_by_device": {
+        "0": 0.3873242457963304,
+        "1": 0.04879203138429071,
+        "2": 0.05084344616686905,
+        "3": 1.0319977901332387
+      },
+      "frozen_no_grad": true,
+      "first_update_changed_by_device": {
+        "0": true,
+        "1": true,
+        "2": true,
+        "3": true
+      },
+      "lr": 1.0000000000000002e-06,
+      "peak_gpu_gib": {
+        "0": 6.229424476623535,
+        "1": 5.877123832702637,
+        "2": 5.877123832702637,
+        "3": 5.852135181427002
+      },
+      "elapsed_seconds": 48.57412008498795,
+      "training_decoder_calls": 0
+    },
+    {
+      "cursor": {
+        "epoch": 0,
+        "batch": 2,
+        "step": 2
+      },
+      "ids": [
+        "32_1340_1085",
+        "231_2336_1612",
+        "107_677_961",
+        "206_2418_1882",
+        "13_1921_1583",
+        "85_2941_2253"
+      ],
+      "latent_l1": 0.1570299801727136,
+      "gradient_norm": 1.0856338739395142,
+      "gradient_norm_by_device": {
+        "0": 0.06833819427503585,
+        "1": 0.03472662866748213,
+        "2": 0.04862740936490555,
+        "3": 1.081831892556283
+      },
+      "frozen_no_grad": true,
+      "first_update_changed_by_device": {},
+      "lr": 2.0000000000000003e-06,
+      "peak_gpu_gib": {
+        "0": 6.991086483001709,
+        "1": 6.620619773864746,
+        "2": 6.620619773864746,
+        "3": 6.601459980010986
+      },
+      "elapsed_seconds": 111.2956913150847,
+      "training_decoder_calls": 0
+    },
+    {
+      "cursor": {
+        "epoch": 0,
+        "batch": 3,
+        "step": 3
+      },
+      "ids": [
+        "102_1774_1206",
+        "137_4489_2824",
+        "61_1714_1393",
+        "154_2847_1665",
+        "156_5139_3095",
+        "98_3055_478"
+      ],
+      "latent_l1": 0.14025532826781273,
+      "gradient_norm": 1.1274484395980835,
+      "gradient_norm_by_device": {
+        "0": 0.23608887608422802,
+        "1": 0.04942681415880608,
+        "2": 0.05728774284873942,
+        "3": 1.0998531945419179
+      },
+      "frozen_no_grad": true,
+      "first_update_changed_by_device": {},
+      "lr": 3e-06,
+      "peak_gpu_gib": {
+        "0": 6.996573448181152,
+        "1": 6.6241960525512695,
+        "2": 6.6241960525512695,
+        "3": 6.60503625869751
+      },
+      "elapsed_seconds": 161.94738434394822,
+      "training_decoder_calls": 0
+    }
+  ],
+  "latest_saved_cursor": {
+    "epoch": 0,
+    "batch": 1,
+    "step": 1
+  },
+  "optimizer_bytes": 6780946453,
+  "training_budget": {
+    "epochs": 4,
+    "updates": 136,
+    "effective_batch": 6
+  },
+  "tmux_session": "m9-latent-only",
+  "loss": "normalized final latent L1 only",
+  "sealed_test_used": false
+}
