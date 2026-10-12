@@ -63,3 +63,5 @@ CUDA_VISIBLE_DEVICES=4,5,6,7 OMP_NUM_THREADS=1 EPOCHS=4 bash scripts/run_m9_late
 输出：`best/transmission_lora.safetensors`、`latest/transmission_lora.safetensors`、`latest/trainer.pt`、`best_metrics.json`、`latest_metrics.json`、`latest_validation/predictions/`、`train.jsonl`、`metrics.jsonl`、`training_summary.json`。
 
 这次单独运行 latent-only 实验；没有启动同预算像素损失对照。与历史 M4 的比较不能单独证明增益来自损失替换而不是继续训练。
+
+训练模型的验证使用 `no_grad`，不能使用 `inference_mode`：Qwen 会缓存 RoPE 张量，推理模式产生的缓存不能在后续训练中保存用于反向。离线 VAE 缓存为独立进程，保存后重新加载为普通张量，不受影响。首次启动在任何优化更新前失败；日志与数字记录保存在 `results_archive/M9/failed_start_inference_cache/`，失败启动的权重已清理。

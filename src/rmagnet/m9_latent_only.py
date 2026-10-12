@@ -147,7 +147,7 @@ class LatentEditor:
         return z-velocity
 
 
-@torch.inference_mode()
+@torch.no_grad()
 def evaluate(a, runner, ids, out):
     out.mkdir(parents=True, exist_ok=True)
     runner.backend.transformer.eval(); rows=[]
